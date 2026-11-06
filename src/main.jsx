@@ -1,0 +1,4 @@
+import {createRoot} from 'react-dom/client';import {useState} from 'react';import './styles.css';import Student from './Student';import Admin from './Admin'
+function App(){const [v,setV]=useState('student');return<><header><div className="logo"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2ee88a" strokeWidth="1.8" strokeLinejoin="round"><path d="M12 3 2 8l10 5 10-5z" fill="#2ee88a" fillOpacity=".25"/><path d="M6 10.5v5c0 1.4 2.7 3 6 3s6-1.6 6-3v-5"/></svg>IGEEKS Test System</div>
+<div className="seg">{[['student','Student exam'],['admin','Admin panel']].map(([k,l])=><button key={k} className={v===k?'on':''} onClick={()=>setV(k)}>{l}</button>)}</div></header><main className={v==='admin'?'wide':''}>{v==='student'?<Student/>:<Admin/>}</main></>}
+createRoot(document.getElementById('root')).render(<App/>)
