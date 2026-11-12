@@ -1,4 +1,72 @@
-import {createRoot} from 'react-dom/client';import {useState} from 'react';import './styles.css';import Student from './Student';import Admin from './Admin'
-function App(){const [v,setV]=useState('student');const [t,setT]=useState(()=>document.documentElement.dataset.theme||'light');const flip=()=>{const n=t==='dark'?'light':'dark';document.documentElement.dataset.theme=n;try{localStorage.setItem('theme',n)}catch{}setT(n)};return<><header><div className="logo"><img src="/logo.png" alt="iGeeks – Bridging Technology"/><small>Test System</small></div>
-<div className="seg">{[['student','Student exam'],['admin','Admin panel']].map(([k,l])=><button key={k} className={v===k?'on':''} onClick={()=>setV(k)}>{l}</button>)}</div><button className="theme" onClick={flip} aria-label={t==='dark'?'Switch to light mode':'Switch to dark mode'} title={t==='dark'?'Light mode':'Dark mode'}>{t==='dark'?'☀️':'🌙'}</button></header><main className={v==='admin'?'wide':''}>{v==='student'?<Student/>:<Admin/>}</main></>}
-createRoot(document.getElementById('root')).render(<App/>)
+// import { createRoot } from 'react-dom/client'; import { useState } from 'react'; import './styles.css'; import Student from './Student'; import Admin from './Admin'
+// function App() {
+//     const [v, setV] = useState('student'); const [t, setT] = useState(() => document.documentElement.dataset.theme || 'light'); const flip = () => { const n = t === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = n; try { localStorage.setItem('theme', n) } catch { } setT(n) }; return <><header><div className="logo"><img src="/logo.png" alt="iGeeks – Bridging Technology" /><small>Test System</small></div>
+//         <div className="seg">{[['student', 'Student exam'], ['admin', 'Admin panel']].map(([k, l]) => <button key={k} className={v === k ? 'on' : ''} onClick={() => setV(k)}>{l}</button>)}</div><button className="theme" onClick={flip} aria-label={t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={t === 'dark' ? 'Light mode' : 'Dark mode'}>{t === 'dark' ? '☀️' : '🌙'}</button></header><main className={v === 'admin' ? 'wide' : ''}>{v === 'student' ? <Student /> : <Admin />}</main></>
+// }
+// createRoot(document.getElementById('root')).render(<App />)
+
+import { createRoot } from 'react-dom/client';
+import { useState } from 'react';
+import './styles.css';
+import Student from './Student';
+import Admin from './Admin';
+
+const App = () => {
+    const [v, setV] = useState('student');
+    const [t, setT] = useState(() => document.documentElement.dataset.theme || 'light');
+
+    const flip = () => {
+        const n = t === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = n;
+
+        try {
+            localStorage.setItem('theme', n);
+        } catch {}
+
+        setT(n);
+    };
+
+    return (
+        <>
+            <header>
+                <div className="logo">
+                    <img
+                        src={`${import.meta.env.BASE_URL}logo.png`}
+                        alt="iGeeks – Bridging Technology"
+                    />
+                    <small>Test System</small>
+                </div>
+
+                <div className="seg">
+                    {[
+                        ['student', 'Student exam'],
+                        ['admin', 'Admin panel']
+                    ].map(([k, l]) => (
+                        <button
+                            key={k}
+                            className={v === k ? 'on' : ''}
+                            onClick={() => setV(k)}
+                        >
+                            {l}
+                        </button>
+                    ))}
+                </div>
+
+                <button
+                    className="theme"
+                    onClick={flip}
+                    aria-label={t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                    title={t === 'dark' ? 'Light mode' : 'Dark mode'}
+                >
+                    {t === 'dark' ? '☀️' : '🌙'}
+                </button>
+            </header>
+
+            <main className={v === 'admin' ? 'wide' : ''}>
+                {v === 'student' ? <Student /> : <Admin />}
+            </main>
+        </>
+    );
+};
+
+createRoot(document.getElementById('root')).render(<App />);
