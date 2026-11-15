@@ -19,6 +19,9 @@ Environment: PostgreSQL 16 with a minimal Supabase shim (roles `anon`, `authenti
 | `vite build` | succeeds |
 | Server-side render of Exam Library, Hosted Exams, Host wizard | no runtime errors |
 
+## Added in the "all 52 ready" pass
+- Fresh load in both migration orders: 52 ready, 0 blocked. Tampering tests (draft question in a package, removed question, wrong section) correctly block with specific reasons. Attempt lifecycle and rollback verified. `vite build` and a server-side render of the new Library screen succeed.
+
 ## Not verified (be aware)
 - **Edge Function `exam` was edited but not executed.** No Deno, no live Supabase. It was syntax-checked with `tsc` only. Deploy to a test project and run one hosted exam end to end (start, answer, refresh to resume, submit, view result) before using it with students.
 - The Student screen rewrite (autosave, resume, groups, section scores) was compiled, not exercised in a browser.

@@ -12,10 +12,13 @@ insert into domains(name,slug,sort,category) values
  ('Logical Reasoning','ce-reasoning',21,'entrance'),
  ('Verbal Ability','ce-verbal',22,'entrance'),
  ('Analytical Thinking','ce-analytical',23,'entrance')
-ON CONFLICT DO NOTHING;
+on conflict do nothing;   -- any unique clash (slug OR name): a domain that already exists under another slug is reused, looked up by NAME
 update domains set category='web'      where slug in ('html','css','javascript','react','nodejs','expressjs','angular');
 update domains set category='language' where slug in ('c','cpp','java','python','csharp');
 update domains set category='database' where slug in ('mongodb','sql','dotnet');
+update domains set category='entrance' where name in ('Quantitative Aptitude','Logical Reasoning','Verbal Ability','Analytical Thinking');
+update domains set category='web' where name='React';
+update domains set category='database' where name='SQL & Databases';
 
 -- ---------------------------------------------------------------- questions: provenance + protection
 alter table questions
@@ -80,12 +83,14 @@ create table if not exists library_exams(
   target_questions int not null check (target_questions > 0),     -- what the package is designed to contain
   question_count int not null default 0,                          -- what it actually contains (filled by validation)
   total_marks numeric not null default 0,
-  sections jsonb not null default '[]',                           -- [{name, questions, marks}]
+  sections jsonb not null default '[]',                           -- [{name, questions, marks}] actual
+  section_targets jsonb not null default '{}',                    -- {"Section name": n} intended allocation; checked by the validator
   status text not null default 'draft' check (status in ('draft','ready','blocked')),
   validation jsonb not null default '{}',
   validated_at timestamptz,
   version int not null default 1,
   created_at timestamptz not null default now());
+alter table library_exams add column if not exists section_targets jsonb not null default '{}';
 create index if not exists lib_cat_diff on library_exams(category, difficulty);
 
 create table if not exists library_exam_questions(
@@ -420,31 +425,31 @@ end $$;
 create or replace function question_problems(q questions) returns text[] language plpgsql stable as $$
 declare p text[] := '{}'; n int; opts jsonb := q.options; c jsonb := q.correct;
 begin
-  if q.content_status <> 'validated' then p := p || 'not validated'; end if;
-  if q.text is null or length(trim(q.text)) < 12 then p := p || 'question text too short'; end if;
-  if q.text ~* '^(question|sample|test)\s*\d*\s*[:.?]?\s*$' then p := p || 'placeholder text'; end if;
+  if q.content_status <> 'validated' then p := array_append(p, 'not validated'); end if;
+  if q.text is null or length(trim(q.text)) < 12 then p := array_append(p, 'question text too short'); end if;
+  if q.text ~* '^(question|sample|test)\s*\d*\s*[:.?]?\s*$' then p := array_append(p, 'placeholder text'); end if;
   if q.type in ('mcq','multi') then
-    if opts is null or jsonb_typeof(opts) <> 'array' then p := p || 'options missing'; return p; end if;
+    if opts is null or jsonb_typeof(opts) <> 'array' then p := array_append(p, 'options missing'); return p; end if;
     n := jsonb_array_length(opts);
-    if n < 3 then p := p || 'fewer than 3 options'; end if;
-    if (select count(distinct lower(trim(x))) from jsonb_array_elements_text(opts) x) <> n then p := p || 'duplicate options'; end if;
-    if c is null or jsonb_typeof(c) <> 'array' or jsonb_array_length(c) = 0 then p := p || 'no correct answer'; return p; end if;
-    if exists (select 1 from jsonb_array_elements_text(c) e where e::int < 0 or e::int >= n) then p := p || 'correct index out of range'; end if;
-    if (select count(distinct e) from jsonb_array_elements_text(c) e) <> jsonb_array_length(c) then p := p || 'repeated correct index'; end if;
-    if q.type = 'mcq' and jsonb_array_length(c) <> 1 then p := p || 'mcq needs exactly one correct option'; end if;
-    if q.type = 'multi' and (jsonb_array_length(c) < 2 or jsonb_array_length(c) >= n) then p := p || 'multi needs 2..n-1 correct options'; end if;
+    if n < 3 then p := array_append(p, 'fewer than 3 options'); end if;
+    if (select count(distinct lower(trim(x))) from jsonb_array_elements_text(opts) x) <> n then p := array_append(p, 'duplicate options'); end if;
+    if c is null or jsonb_typeof(c) <> 'array' or jsonb_array_length(c) = 0 then p := array_append(p, 'no correct answer'); return p; end if;
+    if exists (select 1 from jsonb_array_elements_text(c) e where e::int < 0 or e::int >= n) then p := array_append(p, 'correct index out of range'); end if;
+    if (select count(distinct e) from jsonb_array_elements_text(c) e) <> jsonb_array_length(c) then p := array_append(p, 'repeated correct index'); end if;
+    if q.type = 'mcq' and jsonb_array_length(c) <> 1 then p := array_append(p, 'mcq needs exactly one correct option'); end if;
+    if q.type = 'multi' and (jsonb_array_length(c) < 2 or jsonb_array_length(c) >= n) then p := array_append(p, 'multi needs 2..n-1 correct options'); end if;
   elsif q.type = 'tf' then
-    if c is null or (c #>> '{}') not in ('true','false') then p := p || 'true/false answer invalid'; end if;
+    if c is null or (c #>> '{}') not in ('true','false') then p := array_append(p, 'true/false answer invalid'); end if;
   elsif q.type = 'short' then
-    if c is null or length(trim(c #>> '{}')) = 0 then p := p || 'no accepted answer'; end if;
+    if c is null or length(trim(c #>> '{}')) = 0 then p := array_append(p, 'no accepted answer'); end if;
   elsif q.type = 'code' then
-    if (select count(*) from coding_tests t where t.question_id = q.id) < 3 then p := p || 'fewer than 3 test cases'; end if;
-    if not exists (select 1 from coding_tests t where t.question_id = q.id and t.is_hidden) then p := p || 'no hidden test case'; end if;
-    if not exists (select 1 from coding_tests t where t.question_id = q.id and not t.is_hidden) then p := p || 'no sample test case'; end if;
-    if coalesce(q.statement->>'description','') = '' then p := p || 'coding statement missing'; end if;
-  else p := p || 'unknown type'; end if;
-  if q.type <> 'code' and coalesce(trim(q.explanation),'') = '' then p := p || 'no explanation'; end if;
-  if not q.is_builtin then p := p || 'not a built-in question'; end if;
+    if (select count(*) from coding_tests t where t.question_id = q.id) < 3 then p := array_append(p, 'fewer than 3 test cases'); end if;
+    if not exists (select 1 from coding_tests t where t.question_id = q.id and t.is_hidden) then p := array_append(p, 'no hidden test case'); end if;
+    if not exists (select 1 from coding_tests t where t.question_id = q.id and not t.is_hidden) then p := array_append(p, 'no sample test case'); end if;
+    if coalesce(q.statement->>'description','') = '' then p := array_append(p, 'coding statement missing'); end if;
+  else p := array_append(p, 'unknown type'); end if;
+  if q.type <> 'code' and coalesce(trim(q.explanation),'') = '' then p := array_append(p, 'no explanation'); end if;
+  if not q.is_builtin then p := array_append(p, 'not a built-in question'); end if;
   return p;
 end $$;
 
@@ -454,6 +459,18 @@ begin
   select * into lib from library_exams where id = p_id;
   if not found then raise exception 'LIBRARY_EXAM_NOT_FOUND'; end if;
   select count(*), coalesce(sum(q.marks),0) into n, marks from library_exam_questions l join questions q on q.id = l.question_id where l.library_exam_id = p_id;
+  if (select count(*) from library_exam_questions where library_exam_id = p_id) <> n then issues := issues || jsonb_build_object('check','question_ids','detail','package lists question ids that do not exist'); end if;
+  if lib.duration_min is null or lib.duration_min <= 0 then issues := issues || jsonb_build_object('check','metadata','detail','invalid duration'); end if;
+  if lib.pass_pct is null or lib.pass_pct < 1 or lib.pass_pct > 100 then issues := issues || jsonb_build_object('check','metadata','detail','invalid pass percentage'); end if;
+  if coalesce(trim(lib.title),'') = '' then issues := issues || jsonb_build_object('check','metadata','detail','missing title'); end if;
+  if exists (select 1 from library_exam_questions where library_exam_id = p_id and coalesce(trim(section),'') = '') then issues := issues || jsonb_build_object('check','sections','detail','a question has no section'); end if;
+  if lib.section_targets <> '{}'::jsonb then
+    for r in select e.key as name, e.value::int as want, (select count(*) from library_exam_questions l where l.library_exam_id = p_id and l.section = e.key) as have from jsonb_each_text(lib.section_targets) e loop
+      if r.have <> r.want then issues := issues || jsonb_build_object('check','sections','detail', format('section %s has %s of %s questions', r.name, r.have, r.want)); end if;
+    end loop;
+    if exists (select 1 from library_exam_questions l where l.library_exam_id = p_id and not (lib.section_targets ? l.section)) then issues := issues || jsonb_build_object('check','sections','detail','question in an undeclared section'); end if;
+  end if;
+  if exists (select 1 from library_exam_questions l join questions q on q.id = l.question_id where l.library_exam_id = p_id and (q.marks is null or q.marks <= 0)) then issues := issues || jsonb_build_object('check','marks','detail','a question has zero or negative marks'); end if;
   if n <> lib.target_questions then issues := issues || jsonb_build_object('check','question_count','detail', format('package has %s of %s designed questions', n, lib.target_questions)); end if;
   select count(*) into dups from (select md5(lower(q.text)) from library_exam_questions l join questions q on q.id = l.question_id
       where l.library_exam_id = p_id group by 1 having count(*) > 1) d;
@@ -483,3 +500,12 @@ begin
 end $$;
 revoke all on function validate_all_library_exams() from public, anon, authenticated;
 grant execute on function validate_all_library_exams() to service_role;
+
+-- Admin button "Re-validate": runs the real validators and returns the verdicts. Only admins may call it.
+create or replace function revalidate_library_exams() returns table(slug text, status text, issue_count int) language plpgsql security definer set search_path = public as $$
+begin
+  if not is_admin() then raise exception 'FORBIDDEN'; end if;
+  return query select * from validate_all_library_exams();
+end $$;
+revoke all on function revalidate_library_exams() from public, anon;
+grant execute on function revalidate_library_exams() to authenticated, service_role;

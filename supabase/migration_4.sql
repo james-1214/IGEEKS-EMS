@@ -8,7 +8,7 @@ insert into domains(name,slug,sort) values
  ('HTML','html',1),('CSS','css',2),('JavaScript','javascript',3),('Java','java',4),('Python','python',5),
  ('C++','cpp',6),('C','c',7),('C#','csharp',8),('.NET','dotnet',9),('MongoDB','mongodb',10),
  ('Express.js','expressjs',11),('Node.js','nodejs',12),('Angular','angular',13)
-ON CONFLICT DO NOTHING;
+on conflict (slug) do nothing;
 
 alter table questions
   add column if not exists domain_id uuid references domains(id),

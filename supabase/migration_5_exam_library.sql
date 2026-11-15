@@ -59,6 +59,10 @@ begin
   perform pg_advisory_xact_lock(hashtext(p_email || p_exam::text));
   select * into ex from exams where id = p_exam and live;
   if not found then raise exception 'EXAM_NOT_AVAILABLE'; end if;
+  -- Added by migration_5.sql: server-side eligibility for hosted exams (kept here so running this file later cannot remove it).
+  if to_regprocedure('is_eligible(text,uuid)') is not null then
+    declare ok bool; begin execute 'select is_eligible($1,$2)' into ok using p_email, p_exam; if not coalesce(ok,false) then raise exception 'NOT_ELIGIBLE'; end if; end;
+  end if;
   if ex.start_at is not null and now() < ex.start_at then raise exception 'EXAM_NOT_STARTED'; end if;
   if ex.end_at is not null and now() > ex.end_at then raise exception 'EXAM_ENDED'; end if;
   select * into s from exam_sessions where email = p_email and exam_id = p_exam and status = 'in_progress';
@@ -70,6 +74,7 @@ begin
   if n = 0 then raise exception 'EXAM_HAS_NO_QUESTIONS'; end if;
   secs := case ex.mode when 'total' then ex.total_min*60 when 'perq' then ex.per_sec*n
                        else least(ex.total_min*60, ex.per_sec*n) end;
+  if ex.end_at is not null then secs := least(secs, greatest(1, extract(epoch from (ex.end_at - now()))::int)); end if;   -- an attempt never outlives the exam window
   insert into exam_sessions(email, exam_id, attempt_no, deadline_at, question_ids, option_orders, question_snapshot)
   values (p_email, p_exam, used+1, now() + make_interval(secs => secs), p_qids, coalesce(p_orders,'{}'::jsonb), coalesce(ex.question_snapshot,'{}'::jsonb))
   returning * into s;

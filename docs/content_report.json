@@ -1,8 +1,50 @@
 {
- "total": 647,
+ "total": 1211,
  "failures": [],
  "duplicates": [],
  "near": [
+  [
+   "css",
+   0.89,
+   "Which symbol starts a class selector?",
+   "Which symbol starts an id selector?"
+  ],
+  [
+   "javascript",
+   0.88,
+   "Which keyword declares a block-scoped variable that can be r",
+   "Which keyword declares a variable that cannot be reassigned?"
+  ],
+  [
+   "nodejs",
+   0.89,
+   "How do you import a module in CommonJS?",
+   "How do you load a module in CommonJS?"
+  ],
+  [
+   "c",
+   0.92,
+   "Which header declares printf?",
+   "Which header file declares printf?"
+  ],
+  [
+   "c",
+   0.9,
+   "What is wrong with this code?\nchar *s = \"hi\"; s[0] = 'H';",
+   "What is wrong with this: char *s = \"hello\"; s[0] = 'H';"
+  ],
+  [
+   "c",
+   1.0,
+   "What does this program print?\n\n#include <stdio.h>\nint main(v",
+   "What does this program print?\n\n#include <stdio.h>\nint main(v"
+  ],
+  [
+   "mongodb",
+   0.88,
+   "Which method updates the first document that matches a filte",
+   "Which method returns only the first document that matches a "
+  ],
   [
    "ce-reasoning",
    0.88,
@@ -100,588 +142,504 @@
    "title": "CSS Beginner",
    "category": "web",
    "difficulty": "beginner",
-   "questions": 7,
+   "questions": 20,
    "target": 20,
-   "marks": 7,
-   "pool": 7,
-   "status": "BLOCKED",
-   "issues": [
-    "only 7 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 20,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "css-intermediate",
    "title": "CSS Intermediate",
    "category": "web",
    "difficulty": "intermediate",
-   "questions": 13,
+   "questions": 20,
    "target": 20,
-   "marks": 26,
-   "pool": 13,
-   "status": "BLOCKED",
-   "issues": [
-    "only 13 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 40,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "css-advanced",
    "title": "CSS Advanced",
    "category": "web",
    "difficulty": "advanced",
-   "questions": 5,
+   "questions": 20,
    "target": 20,
-   "marks": 15,
-   "pool": 5,
-   "status": "BLOCKED",
-   "issues": [
-    "only 5 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 60,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "javascript-beginner",
    "title": "JavaScript Beginner",
    "category": "web",
    "difficulty": "beginner",
-   "questions": 5,
+   "questions": 20,
    "target": 20,
-   "marks": 7,
-   "pool": 5,
-   "status": "BLOCKED",
-   "issues": [
-    "only 5 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 22,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "javascript-intermediate",
    "title": "JavaScript Intermediate",
    "category": "web",
    "difficulty": "intermediate",
-   "questions": 13,
+   "questions": 20,
    "target": 20,
-   "marks": 30,
-   "pool": 13,
-   "status": "BLOCKED",
-   "issues": [
-    "only 13 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 44,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "javascript-advanced",
    "title": "JavaScript Advanced",
    "category": "web",
    "difficulty": "advanced",
-   "questions": 7,
+   "questions": 20,
    "target": 20,
-   "marks": 19,
-   "pool": 7,
-   "status": "BLOCKED",
-   "issues": [
-    "only 7 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 58,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "react-beginner",
    "title": "React Beginner",
    "category": "web",
    "difficulty": "beginner",
-   "questions": 0,
+   "questions": 20,
    "target": 20,
-   "marks": 0,
-   "pool": 0,
-   "status": "BLOCKED",
-   "issues": [
-    "only 0 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 20,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "react-intermediate",
    "title": "React Intermediate",
    "category": "web",
    "difficulty": "intermediate",
-   "questions": 0,
+   "questions": 20,
    "target": 20,
-   "marks": 0,
-   "pool": 0,
-   "status": "BLOCKED",
-   "issues": [
-    "only 0 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 40,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "react-advanced",
    "title": "React Advanced",
    "category": "web",
    "difficulty": "advanced",
-   "questions": 0,
+   "questions": 20,
    "target": 20,
-   "marks": 0,
-   "pool": 0,
-   "status": "BLOCKED",
-   "issues": [
-    "only 0 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 60,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "nodejs-beginner",
    "title": "Node.js Beginner",
    "category": "web",
    "difficulty": "beginner",
-   "questions": 5,
+   "questions": 20,
    "target": 20,
-   "marks": 7,
-   "pool": 5,
-   "status": "BLOCKED",
-   "issues": [
-    "only 5 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 22,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "nodejs-intermediate",
    "title": "Node.js Intermediate",
    "category": "web",
    "difficulty": "intermediate",
-   "questions": 12,
+   "questions": 20,
    "target": 20,
-   "marks": 27,
-   "pool": 12,
-   "status": "BLOCKED",
-   "issues": [
-    "only 12 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 43,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "nodejs-advanced",
    "title": "Node.js Advanced",
    "category": "web",
    "difficulty": "advanced",
-   "questions": 8,
+   "questions": 20,
    "target": 20,
-   "marks": 23,
-   "pool": 8,
-   "status": "BLOCKED",
-   "issues": [
-    "only 8 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 59,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "expressjs-beginner",
    "title": "Express.js Beginner",
    "category": "web",
    "difficulty": "beginner",
-   "questions": 5,
+   "questions": 20,
    "target": 20,
-   "marks": 5,
-   "pool": 5,
-   "status": "BLOCKED",
-   "issues": [
-    "only 5 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 20,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "expressjs-intermediate",
    "title": "Express.js Intermediate",
    "category": "web",
    "difficulty": "intermediate",
-   "questions": 11,
+   "questions": 20,
    "target": 20,
-   "marks": 22,
-   "pool": 11,
-   "status": "BLOCKED",
-   "issues": [
-    "only 11 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 40,
+   "pool": 23,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "expressjs-advanced",
    "title": "Express.js Advanced",
    "category": "web",
    "difficulty": "advanced",
-   "questions": 9,
+   "questions": 20,
    "target": 20,
-   "marks": 26,
-   "pool": 9,
-   "status": "BLOCKED",
-   "issues": [
-    "only 9 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 59,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "angular-beginner",
    "title": "Angular Beginner",
    "category": "web",
    "difficulty": "beginner",
-   "questions": 5,
+   "questions": 20,
    "target": 20,
-   "marks": 5,
-   "pool": 5,
-   "status": "BLOCKED",
-   "issues": [
-    "only 5 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 20,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "angular-intermediate",
    "title": "Angular Intermediate",
    "category": "web",
    "difficulty": "intermediate",
-   "questions": 13,
+   "questions": 20,
    "target": 20,
-   "marks": 26,
-   "pool": 13,
-   "status": "BLOCKED",
-   "issues": [
-    "only 13 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 40,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "angular-advanced",
    "title": "Angular Advanced",
    "category": "web",
    "difficulty": "advanced",
-   "questions": 7,
+   "questions": 20,
    "target": 20,
-   "marks": 20,
-   "pool": 7,
-   "status": "BLOCKED",
-   "issues": [
-    "only 7 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 59,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "c-beginner",
    "title": "C Beginner",
    "category": "language",
    "difficulty": "beginner",
-   "questions": 6,
+   "questions": 20,
    "target": 20,
-   "marks": 8,
-   "pool": 6,
-   "status": "BLOCKED",
-   "issues": [
-    "only 6 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 22,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "c-intermediate",
    "title": "C Intermediate",
    "category": "language",
    "difficulty": "intermediate",
-   "questions": 12,
+   "questions": 20,
    "target": 20,
-   "marks": 27,
-   "pool": 12,
-   "status": "BLOCKED",
-   "issues": [
-    "only 12 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 43,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "c-advanced",
    "title": "C Advanced",
    "category": "language",
    "difficulty": "advanced",
-   "questions": 7,
+   "questions": 20,
    "target": 20,
-   "marks": 20,
-   "pool": 7,
-   "status": "BLOCKED",
-   "issues": [
-    "only 7 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 59,
+   "pool": 22,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "cpp-beginner",
    "title": "C++ Beginner",
    "category": "language",
    "difficulty": "beginner",
-   "questions": 5,
+   "questions": 20,
    "target": 20,
-   "marks": 7,
-   "pool": 5,
-   "status": "BLOCKED",
-   "issues": [
-    "only 5 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 22,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "cpp-intermediate",
    "title": "C++ Intermediate",
    "category": "language",
    "difficulty": "intermediate",
-   "questions": 13,
+   "questions": 20,
    "target": 20,
-   "marks": 29,
-   "pool": 13,
-   "status": "BLOCKED",
-   "issues": [
-    "only 13 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 43,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "cpp-advanced",
    "title": "C++ Advanced",
    "category": "language",
    "difficulty": "advanced",
-   "questions": 8,
+   "questions": 20,
    "target": 20,
-   "marks": 23,
-   "pool": 8,
-   "status": "BLOCKED",
-   "issues": [
-    "only 8 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 59,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "java-beginner",
    "title": "Java Beginner",
    "category": "language",
    "difficulty": "beginner",
-   "questions": 5,
+   "questions": 20,
    "target": 20,
-   "marks": 7,
-   "pool": 5,
-   "status": "BLOCKED",
-   "issues": [
-    "only 5 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 22,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "java-intermediate",
    "title": "Java Intermediate",
    "category": "language",
    "difficulty": "intermediate",
-   "questions": 13,
+   "questions": 20,
    "target": 20,
-   "marks": 29,
-   "pool": 13,
-   "status": "BLOCKED",
-   "issues": [
-    "only 13 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 43,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "java-advanced",
    "title": "Java Advanced",
    "category": "language",
    "difficulty": "advanced",
-   "questions": 7,
+   "questions": 20,
    "target": 20,
-   "marks": 20,
-   "pool": 7,
-   "status": "BLOCKED",
-   "issues": [
-    "only 7 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 59,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "python-beginner",
    "title": "Python Beginner",
    "category": "language",
    "difficulty": "beginner",
-   "questions": 5,
+   "questions": 20,
    "target": 20,
-   "marks": 7,
-   "pool": 5,
-   "status": "BLOCKED",
-   "issues": [
-    "only 5 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 22,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "python-intermediate",
    "title": "Python Intermediate",
    "category": "language",
    "difficulty": "intermediate",
-   "questions": 12,
+   "questions": 20,
    "target": 20,
-   "marks": 27,
-   "pool": 12,
-   "status": "BLOCKED",
-   "issues": [
-    "only 12 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 43,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "python-advanced",
    "title": "Python Advanced",
    "category": "language",
    "difficulty": "advanced",
-   "questions": 8,
+   "questions": 20,
    "target": 20,
-   "marks": 23,
-   "pool": 8,
-   "status": "BLOCKED",
-   "issues": [
-    "only 8 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 59,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "csharp-beginner",
    "title": "C# Beginner",
    "category": "language",
    "difficulty": "beginner",
-   "questions": 5,
+   "questions": 20,
    "target": 20,
-   "marks": 7,
-   "pool": 5,
-   "status": "BLOCKED",
-   "issues": [
-    "only 5 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 22,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "csharp-intermediate",
    "title": "C# Intermediate",
    "category": "language",
    "difficulty": "intermediate",
-   "questions": 13,
+   "questions": 20,
    "target": 20,
-   "marks": 29,
-   "pool": 13,
-   "status": "BLOCKED",
-   "issues": [
-    "only 13 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 43,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "csharp-advanced",
    "title": "C# Advanced",
    "category": "language",
    "difficulty": "advanced",
-   "questions": 7,
+   "questions": 20,
    "target": 20,
-   "marks": 20,
-   "pool": 7,
-   "status": "BLOCKED",
-   "issues": [
-    "only 7 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 59,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "mongodb-beginner",
    "title": "MongoDB Beginner",
    "category": "database",
    "difficulty": "beginner",
-   "questions": 4,
+   "questions": 20,
    "target": 20,
-   "marks": 4,
-   "pool": 4,
-   "status": "BLOCKED",
-   "issues": [
-    "only 4 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 20,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "mongodb-intermediate",
    "title": "MongoDB Intermediate",
    "category": "database",
    "difficulty": "intermediate",
-   "questions": 12,
+   "questions": 20,
    "target": 20,
-   "marks": 24,
-   "pool": 12,
-   "status": "BLOCKED",
-   "issues": [
-    "only 12 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 40,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "mongodb-advanced",
    "title": "MongoDB Advanced",
    "category": "database",
    "difficulty": "advanced",
-   "questions": 10,
+   "questions": 20,
    "target": 20,
-   "marks": 29,
-   "pool": 10,
-   "status": "BLOCKED",
-   "issues": [
-    "only 10 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 59,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "sql-beginner",
    "title": "SQL & Databases Beginner",
    "category": "database",
    "difficulty": "beginner",
-   "questions": 0,
+   "questions": 20,
    "target": 20,
-   "marks": 0,
-   "pool": 0,
-   "status": "BLOCKED",
-   "issues": [
-    "only 0 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 20,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "sql-intermediate",
    "title": "SQL & Databases Intermediate",
    "category": "database",
    "difficulty": "intermediate",
-   "questions": 0,
+   "questions": 20,
    "target": 20,
-   "marks": 0,
-   "pool": 0,
-   "status": "BLOCKED",
-   "issues": [
-    "only 0 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 40,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "sql-advanced",
    "title": "SQL & Databases Advanced",
    "category": "database",
    "difficulty": "advanced",
-   "questions": 0,
+   "questions": 20,
    "target": 20,
-   "marks": 0,
-   "pool": 0,
-   "status": "BLOCKED",
-   "issues": [
-    "only 0 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 60,
+   "pool": 23,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "dotnet-beginner",
    "title": ".NET Beginner",
    "category": "database",
    "difficulty": "beginner",
-   "questions": 5,
+   "questions": 20,
    "target": 20,
-   "marks": 7,
-   "pool": 5,
-   "status": "BLOCKED",
-   "issues": [
-    "only 5 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 22,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "dotnet-intermediate",
    "title": ".NET Intermediate",
    "category": "database",
    "difficulty": "intermediate",
-   "questions": 12,
+   "questions": 20,
    "target": 20,
-   "marks": 24,
-   "pool": 12,
-   "status": "BLOCKED",
-   "issues": [
-    "only 12 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 40,
+   "pool": 21,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "dotnet-advanced",
    "title": ".NET Advanced",
    "category": "database",
    "difficulty": "advanced",
-   "questions": 8,
+   "questions": 20,
    "target": 20,
-   "marks": 23,
-   "pool": 8,
-   "status": "BLOCKED",
-   "issues": [
-    "only 8 of 20 designed questions can be filled with validated, correctly-levelled questions"
-   ]
+   "marks": 59,
+   "pool": 20,
+   "status": "READY",
+   "issues": []
   },
   {
    "slug": "common-entrance-standard",
@@ -775,66 +733,74 @@
    "advanced": 33
   },
   "css": {
-   "beginner": 7,
-   "intermediate": 13,
-   "advanced": 5
+   "beginner": 21,
+   "intermediate": 20,
+   "advanced": 21
   },
   "javascript": {
-   "beginner": 5,
-   "intermediate": 13,
-   "advanced": 7
+   "beginner": 21,
+   "intermediate": 20,
+   "advanced": 21
   },
-  "react": {},
+  "react": {
+   "beginner": 20,
+   "intermediate": 20,
+   "advanced": 20
+  },
   "nodejs": {
-   "beginner": 5,
-   "intermediate": 12,
-   "advanced": 8
+   "beginner": 21,
+   "intermediate": 20,
+   "advanced": 20
   },
   "expressjs": {
-   "beginner": 5,
-   "intermediate": 11,
-   "advanced": 9
+   "beginner": 21,
+   "intermediate": 23,
+   "advanced": 20
   },
   "angular": {
-   "beginner": 5,
-   "intermediate": 13,
-   "advanced": 7
+   "beginner": 21,
+   "intermediate": 21,
+   "advanced": 21
   },
   "c": {
-   "beginner": 6,
-   "intermediate": 12,
-   "advanced": 7
+   "beginner": 21,
+   "intermediate": 20,
+   "advanced": 22
   },
   "cpp": {
-   "beginner": 5,
-   "intermediate": 13,
-   "advanced": 8
+   "beginner": 20,
+   "intermediate": 20,
+   "advanced": 20
   },
   "java": {
-   "beginner": 5,
-   "intermediate": 13,
-   "advanced": 7
+   "beginner": 21,
+   "intermediate": 20,
+   "advanced": 21
   },
   "python": {
-   "beginner": 5,
-   "intermediate": 12,
-   "advanced": 8
+   "beginner": 21,
+   "intermediate": 20,
+   "advanced": 20
   },
   "csharp": {
-   "beginner": 5,
-   "intermediate": 13,
-   "advanced": 7
+   "beginner": 20,
+   "intermediate": 20,
+   "advanced": 21
   },
   "mongodb": {
-   "beginner": 4,
-   "intermediate": 12,
-   "advanced": 10
+   "beginner": 21,
+   "intermediate": 21,
+   "advanced": 21
   },
-  "sql": {},
+  "sql": {
+   "beginner": 20,
+   "intermediate": 20,
+   "advanced": 23
+  },
   "dotnet": {
-   "beginner": 5,
-   "intermediate": 12,
-   "advanced": 8
+   "beginner": 20,
+   "intermediate": 21,
+   "advanced": 20
   },
   "ce-quant": {
    "beginner": 22,

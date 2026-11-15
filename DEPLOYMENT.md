@@ -1,32 +1,39 @@
-# Deployment: Exam Library + Host Exam
+# Deployment: make all 52 Exam Library packages ready
 
-Order matters. All SQL is additive and safe to re-run. Nothing existing is dropped.
+Nothing here has been run against your live Supabase project. Everything below marked **YOU** needs your approval and your execution.
 
-1. **Back up** your Supabase database (Dashboard > Database > Backups).
-2. SQL Editor, in this order:
-   1. `supabase/migration_5.sql`  (library, hosting, snapshots, protection, eligibility, validation)
-   2. `supabase/seed_questions.sql`  (all built-in questions, or the files in `supabase/seed/`)
-   3. `supabase/library/01_exam_packages.sql`  (exam packages; ends by validating every package in the database)
-   The last statement prints each package with `ready` or `blocked`. Only `ready` packages can be hosted.
-3. Deploy the updated function: `supabase functions deploy exam --no-verify-jwt` (the `api` function is unchanged).
-4. `npm install && npm run build` and publish `dist/` as before. No new environment variables. The service-role key stays in the Edge Functions only.
-5. Sign in as admin > **Exam Library** > pick *HTML Beginner* or *Common Entrance Examination – Standard* > **Host Exam**.
+## 0. Before you start (YOU)
+1. Take a backup: Supabase Dashboard > Database > Backups (or `pg_dump "$SUPABASE_DB_URL" > backup.sql`).
+2. Prefer to rehearse on a copy (a Supabase branch or a restored backup) first.
 
-## What changed
-| Area | Change |
-|---|---|
-| Database | `migration_5.sql`: `library_exams`, `library_exam_questions`, `hosted_exams`, `hosted_exam_questions` (frozen snapshot), `hosted_exam_students`; new columns on `questions` (`is_builtin`, `topic`, `source`, `content_status`) and `exams` (`hosted_id`, `require_fullscreen`, `ai_proctoring`); domains React, SQL & Databases and four entrance sections |
-| Security | Triggers make built-in questions and their test cases read-only for admins in the browser; snapshot rows are immutable; a hosted exam's question set cannot be re-pointed; RLS read-only on library and hosting tables; hosting only through admin-checked `security definer` functions; `is_eligible()` checked in the Edge Function and again in `start_attempt` |
-| Edge function `exam` | Serves hosted exams from the snapshot, eligibility filtering, section scores, fullscreen/proctoring flags |
-| Admin UI | Exam Library, Host Exam wizard (5 steps), Hosted Exams; built-in questions show a lock; hosted rows are hidden from the custom-exam editor. The old "Create Exam" is kept as **Custom Exam** |
-| Student UI | Now uses the session-based `exam` function: autosave, resume, server timer, eligibility, Active / Upcoming / Completed groups, section scores |
+## 1. Exact SQL execution order (YOU: SQL Editor, or `psql "$SUPABASE_DB_URL" -f <file>`)
+Every file is idempotent and safe to re-run. Run each file to completion before the next.
 
-## Lifecycle
-`draft` > `scheduled` (published with a future start) or `published` (open, nobody started) > `active` (open and someone started) > `completed` (closing time passed); `cancelled` at any point. Scheduled/published/active/completed are derived from the clock and attempts, so no cron job is needed.
+| # | File | Why |
+|---|---|---|
+| 1 | `supabase/migration_5.sql` | **Re-run it even if you ran it before.** It replaces the validator that crashed with `22P02 malformed array literal`, adds section/metadata/marks checks, the `section_targets` column, and the admin-only `revalidate_library_exams()` used by the new Re-validate button. It reuses the entrance domains your database already has (looked up by name, so a different slug is fine) |
+| 2 | `supabase/migration_5_exam_library.sql` | Only if you want the `exam_templates` tables. Safe in either order relative to #1: its `start_attempt` now keeps the eligibility check and window clamp. The current UI does **not** use these tables |
+| 3 | `supabase/seed_questions.sql` | 1,211 built-in questions. Adds 564 new ones (source `igeeks-v3`) and 318 `igeeks-v2`; existing rows are matched by domain + text and only marked built-in/validated. Admin drafts are never touched |
+| 4 | `supabase/library/01_exam_packages.sql` | Fills all 52 packages with the right questions, stores the intended section allocation, then runs the validator and prints each package |
+| 5 | `supabase/verify/52_ready.sql` | Read-only report. Expected: `52 / 52 / 0` and every problem table empty |
 
-## Adding more built-in content
-Add a Python file in `tools/question_bank/` using `M()`, `S()`, `T()`, `CODE()` after `dom('react')` etc., import it in `extra.py`, run `python3 tools/question_bank/build.py`, then re-run steps 2.2 and 2.3. The build stops on structural errors and rewrites `docs/CONTENT_QUALITY_REPORT.md`. A package turns `ready` automatically when it has 20 validated questions of its level.
-Hosted exams are unaffected by later library changes.
+## 2. Exact commands (YOU)
+```bash
+# Edge Function (unchanged since the previous delivery, redeploy if you have not yet)
+supabase functions deploy exam --no-verify-jwt
+# Frontend
+npm install && npm run build      # publish dist/ as you do today
+```
 
-## Run the database tests
-`supabase/tests/run.sh` (needs local PostgreSQL; no Supabase account).
+## 3. Rollback
+`supabase/rollback_v3_content.sql` removes only the `igeeks-v3` questions from packages (hosted exams keep their frozen snapshots), deletes v3 questions with no history and marks the rest `rejected`, and sets packages back to `blocked`. Restore by re-running steps 3 and 4. v1, v2 and admin questions are never touched.
+
+## 4. What was done locally (by me, on a scratch PostgreSQL 16)
+Build, seeds, validator, admin screen, rollback and the hosting/student lifecycle were exercised there. See `docs/IMPLEMENTATION_REPORT.md` and `docs/TEST_REPORT.md`. **Not exercised:** the Edge Function (no Deno) and anything against your real database.
+
+## 5. Differences between the repository and your live database
+I could only see what you described, not the live schema.
+- Your live bank has 66 `igeeks-v2` questions; the repository seeds 318. Seeds are idempotent, so running them fills the gap without duplicating.
+- Your 43 `admin` drafts stay drafts: not built-in, not validated, never placed in a package. The validator blocks any package that includes one.
+- `exam_templates` / `exam_targets` / `exams.template_id` (from `migration_5_exam_library.sql`) is a separate system. **The admin UI and hosting flow use `library_exams` + `hosted_exams`** (`src/admin/Library.jsx`). `src/admin/ExamLibrary.jsx` is not imported anywhere and was left untouched.
+- Entrance domains: if they exist under other slugs (for example `quantitative-aptitude`), nothing is renamed. All seeds find domains by name.

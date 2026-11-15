@@ -15,7 +15,7 @@ import a, b, c                                  # the original 329 questions
 from common import B
 ORIG = {k: len(v) for k, v in B.items()}
 import html_extra, ce_quant, ce_reasoning, ce_verbal, ce_analytical   # new original content
-import topics
+import topics, verify
 try:
     import extra                                 # optional: further domains, one file each, listed in extra.py
 except ImportError:
@@ -31,19 +31,41 @@ DOMAINS = [  # slug, name, category
  ('python','Python','language'),('csharp','C#','language'),('mongodb','MongoDB','database'),('sql','SQL & Databases','database'),('dotnet','.NET','database')]
 ENTRANCE = [('ce-quant','Quantitative Aptitude'),('ce-reasoning','Logical Reasoning'),('ce-verbal','Verbal Ability'),('ce-analytical','Analytical Thinking')]
 ALL_SLUGS = [d[0] for d in DOMAINS] + [e[0] for e in ENTRANCE]
+NAME = {d[0]: d[1] for d in DOMAINS}; NAME.update(dict(ENTRANCE))
 FILES = {'html':'01_html','css':'02_css','javascript':'03_javascript','java':'04_java','python':'05_python','cpp':'06_cpp','c':'07_c','csharp':'08_csharp',
          'dotnet':'09_dotnet','mongodb':'10_mongodb','expressjs':'11_expressjs','nodejs':'12_nodejs','angular':'13_angular','react':'14_react','sql':'15_sql',
          'ce-quant':'20_ce_quant','ce-reasoning':'21_ce_reasoning','ce-verbal':'22_ce_verbal','ce-analytical':'23_ce_analytical'}
 LEVELS = [('beginner','Beginner',30,1),('intermediate','Intermediate',40,2),('advanced','Advanced',50,3)]
 PKG_SIZE = 20
 q = lambda s: '$q$' + str(s) + '$q$'
-norm = lambda s: re.sub(r'[^a-z0-9 ]', '', s.lower())
+def core(t):
+    parts = t.split('\n\n', 1)
+    body = parts[1] if len(parts) > 1 else t
+    drop = ('#include', 'import ', 'using namespace', 'public class Main', 'public static void main', 'int main', 'return 0', 'static void main')
+    lines = [l for l in body.split('\n') if l.strip() and not l.strip().startswith(drop) and l.strip() not in ('{', '}')]
+    return '\n'.join(lines) if len(parts) > 1 and lines else t
+norm = lambda s: re.sub(r'[^a-z0-9 ]', '', core(s).lower())
 h = lambda t: hashlib.md5(t.lower().encode()).hexdigest()    # same as md5(lower(text)) in Postgres
 
+# ------------------------------------------------------------------ 0. drop new questions whose stem already exists (logged, never silent)
+SKIPPED = []
+for slug, qs in B.items():
+    keep, seen = [], set()
+    for i, x in enumerate(qs):
+        k = h(x['text'])
+        if k in seen and x.get('src'):
+            SKIPPED.append((slug, x['text'][:80].replace('\n', ' '))); continue
+        if x.get('src') and '\n\n' not in x['text']:
+            nx = re.sub(r'[^a-z0-9 ]', '', x['text'].lower())
+            if any('\n\n' not in y['text'] and abs(len(nx) - len(re.sub(r'[^a-z0-9 ]', '', y['text'].lower()))) < 25 and
+                   difflib.SequenceMatcher(None, nx, re.sub(r'[^a-z0-9 ]', '', y['text'].lower())).ratio() >= 0.92 for y in keep):
+                SKIPPED.append((slug, '(near-duplicate) ' + x['text'][:70].replace('\n', ' '))); continue
+        seen.add(k); keep.append(x)
+    B[slug] = keep
 # ------------------------------------------------------------------ 1. annotate
 for slug, qs in B.items():
     for i, x in enumerate(qs):
-        x['source'] = 'igeeks-v1' if i < ORIG.get(slug, 0) else 'igeeks-v2'
+        x['source'] = x.get('src') or ('igeeks-v1' if i < ORIG.get(slug, 0) else 'igeeks-v2')
         x['topic'] = x.get('topic') or topics.tag(slug, x['text'], x.get('options'))
         x['hash'] = h(x['text'])
 
@@ -94,6 +116,8 @@ for slug in ALL_SLUGS:
         for j in range(i + 1, len(nt)):
             if abs(len(nt[i][0]) - len(nt[j][0])) > 25: continue
             r = difflib.SequenceMatcher(None, nt[i][0], nt[j][0]).ratio()
+            if '\n\n' in nt[i][1]['text'] or '\n\n' in nt[j][1]['text']:
+                if r < 0.999: continue          # short programs that differ in an expression are different questions
             if r >= 0.88: near.append((slug, round(r, 2), nt[i][1]['text'][:60], nt[j][1]['text'][:60]))
 # exact duplicates across domains
 alltxt = defaultdict(list)
@@ -113,13 +137,13 @@ def emit(slug):
         title = q(x['text']) if x['type'] == 'code' else 'null'
         out.append(
             "insert into questions(domain_id,type,category,difficulty,text,title,options,correct,marks,explanation,statement,languages,meta,is_builtin,topic,source,content_status)\n"
-            f"select d.id,'{x['type']}','{x['cat']}','{x['diff']}',{q(x['text'])},{title},{opts},{cor},{x['marks']},{q(x['expl'])},{st},{lang},{meta},true,{q(x['topic'])},'{x['source']}','validated' from domains d where d.slug='{slug}'\n"
+            f"select d.id,'{x['type']}','{x['cat']}','{x['diff']}',{q(x['text'])},{title},{opts},{cor},{x['marks']},{q(x['expl'])},{st},{lang},{meta},true,{q(x['topic'])},'{x['source']}','validated' from domains d where d.name={q(NAME[slug])}\n"
             "on conflict (domain_id, md5(lower(text))) do update set is_builtin=true, content_status='validated', topic=excluded.topic, source=excluded.source;\n")
         if x['type'] == 'code':
             vals = ','.join(f"({q(i)},{q(o)},{'true' if hd else 'false'},{p})" for p, (i, o, hd) in enumerate(x['tests'], 1))
             out.append("insert into coding_tests(question_id,input,expected,is_hidden,position)\n"
                        f"select qq.id,v.i,v.o,v.h,v.p from questions qq join domains d on d.id=qq.domain_id cross join (values {vals}) as v(i,o,h,p)\n"
-                       f"where d.slug='{slug}' and qq.text={q(x['text'])} and not exists (select 1 from coding_tests c where c.question_id=qq.id);\n")
+                       f"where d.name={q(NAME[slug])} and qq.text={q(x['text'])} and not exists (select 1 from coding_tests c where c.question_id=qq.id);\n")
     return ''.join(out)
 
 allseed = ["-- IGEEKS built-in question bank. Run AFTER migration_5.sql. Safe to run more than once.\n"]
@@ -178,19 +202,23 @@ for dsl, sname in SECTIONS:
         desc=f'25-question section test on {sname} drawn from the full pool, mixed difficulty, 1 mark each.',
         items=[(sname, dsl, x) for x in pick(dsl, SECTION_SETS[dsl], avoid=False)], pool=len(B[dsl])))
 
+def sect_targets(p):
+    c = Counter(sec for sec, _, _ in p['items'])
+    if p['type'] == 'entrance': return {k: v for k, v in zip([x[1] for x in SECTIONS], [{'ce-quant':15,'ce-reasoning':15,'ce-verbal':10,'ce-analytical':10}[x[0]] for x in SECTIONS])}
+    return {'Main': p['target']} if p['type'] == 'subject' else {p['items'][0][0]: p['target']} if p['items'] else {}
 lib = ["-- Exam library packages. Run AFTER the seed files. Re-runnable. Ends by validating every package inside the database.\n"]
 for p in PACKAGES:
-    dsel = f"(select id from domains where slug='{p['dom']}')" if p['dom'] else 'null'
-    lib.append("insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions)\n"
-               f"values ('{p['slug']}',{q(p['title'])},{q(p['desc'])},{dsel},'{p['cat']}','{p['diff']}','{p['type']}',{p['dur']},{p['pass_']},{p['target']})\n"
-               "on conflict (slug) do update set title=excluded.title, description=excluded.description, duration_min=excluded.duration_min, pass_pct=excluded.pass_pct, target_questions=excluded.target_questions;\n")
+    dsel = f"(select id from domains where name={q(NAME[p['dom']])})" if p['dom'] else 'null'
+    lib.append("insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)\n"
+               f"values ('{p['slug']}',{q(p['title'])},{q(p['desc'])},{dsel},'{p['cat']}','{p['diff']}','{p['type']}',{p['dur']},{p['pass_']},{p['target']},{q(json.dumps(sect_targets(p)))}::jsonb)\n"
+               "on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;\n")
     lib.append(f"delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='{p['slug']}');\n")
     if p['items']:
-        vals = ',\n  '.join(f"({q(sec)},{i},'{dsl}','{x['hash']}')" for i, (sec, dsl, x) in enumerate(p['items'], 1))
+        vals = ',\n  '.join(f"({q(sec)},{i},{q(NAME[dsl])},'{x['hash']}')" for i, (sec, dsl, x) in enumerate(p['items'], 1))
         lib.append("insert into library_exam_questions(library_exam_id,question_id,section,position)\n"
                    "select le.id,qq.id,v.sec,v.pos from library_exams le\n"
                    f"cross join (values\n  {vals}\n) as v(sec,pos,dom,h)\n"
-                   "join domains d on d.slug=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h\n"
+                   "join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h\n"
                    f"where le.slug='{p['slug']}';\n")
 lib.append("\nselect * from validate_all_library_exams();\n")
 open(os.path.join(LIB, '01_exam_packages.sql'), 'w').write(''.join(lib))
@@ -223,6 +251,7 @@ ready = [v for v in verdicts if v['status'] == 'READY']; blocked = [v for v in v
 R = ['# IGEEKS EMS – Content Quality Report', f'Generated {datetime.datetime.now().strftime("%Y-%m-%d %H:%M")} by `tools/question_bank/build.py`', '',
      '## Summary', f'- Built-in questions: **{tot}** (original 329 preserved + {tot-329} new)', f'- Question-level validation failures: **{len(bad)}**',
      f'- Exact duplicates inside a domain: **{len(dups)}**; near-duplicates (>=88% similar text): **{len(near)}**; exact duplicates across domains: **{len(cross)}**',
+     f'- New questions skipped because the same stem already existed: **{len(SKIPPED)}**',
      f'- Exam packages: **{len(ready)} READY**, **{len(blocked)} BLOCKED** of {len(verdicts)}',
      f'- Content still needed: **{sum(max(0,30-cov[x][l]) for x in ALL_SLUGS if not x.startswith("ce-") for l in ("beginner","intermediate","advanced"))}** questions for 30/30/30 in every subject domain; **{sum(max(0,PKG_SIZE-cov[x][l]) for x in ALL_SLUGS if not x.startswith("ce-") for l in ("beginner","intermediate","advanced"))}** to make every {PKG_SIZE}-question subject package READY. BLOCKED packages cannot be hosted.',
      f'- MCQ answer-position spread (A,B,C,D): {[pos[i] for i in range(4)]}; correct option is the longest in {longest/mcqn:.0%} of {mcqn} MCQs', '',
@@ -237,9 +266,13 @@ for v in verdicts:
 R += ['', '## How correctness is checked', '- Structure (every question): valid options, valid answer indexes, explanation present, no placeholder text, no `$q$` delimiter, topic present. Mirrors `question_problems()` in migration_5.sql, which re-checks inside the database.',
       '- Quantitative / analytical answers: each key is recomputed by Python (`calc=` in the authoring file); the build stops on a mismatch.',
       '- Reasoning puzzles (series, directions, seating, ranking, calendar, knights and knaves): verified by simulation or brute force in `ce_reasoning.py` and `ce_analytical.py`.',
+      f'- Output-prediction questions (igeeks-v3) are EXECUTED before they are accepted: {sum(verify.STATS.values())} runs this build (Python {verify.STATS["py"]}, Node {verify.STATS["js"]}, PostgreSQL SQL {verify.STATS["sql"]}, C {verify.STATS["c"]}, C++ {verify.STATS["cpp"]}, Java {verify.STATS["java"]}). The build stops if any result differs from the key.',
+      '- NOT machine-verified (reviewed by the author only): conceptual questions in every domain, all C#, .NET, MongoDB, React, Angular, Express and Node conceptual items (no runtime for C#/.NET/MongoDB in the build environment), HTML, verbal ability.',
       '- Coding questions: expected outputs are produced by Python reference solutions. They have NOT been compiled or run in Judge0 in this environment.',
       '- Verbal, HTML and the rest of the conceptual content: reviewed by the author; there is no automated oracle for these. Spot-check before high-stakes use.',
       '- Original 329 questions: structure-validated, exact/near-duplicate scanned. Topics for them are assigned by keyword rules (`topics.py`), not by hand.', '']
+if SKIPPED:
+    R += ['## Skipped (stem already in the bank)'] + [f'- {d}: {t}' for d, t in SKIPPED] + ['']
 if near:
     R += ['## Near-duplicate pairs to review', '| Domain | Similarity | A | B |', '|---|---:|---|---|'] + [f'| {d} | {r} | {x} | {y} |' for d, r, x, y in near[:60]] + ['']
 if bad:

@@ -4,6 +4,7 @@ insert into admins values ('11111111-1111-1111-1111-111111111111');
 insert into students(email,name,branch) values ('a@x','A','CSE'),('b@x','B','Mechanical'),('c@x','C','cse ');
 grant select,insert,update,delete on all tables in schema public to authenticated;
 grant usage on all sequences in schema public to authenticated;
+grant all on all tables in schema public to service_role;
 \echo --- 1 admin tries to edit/delete a built-in question
 set role authenticated; set request.jwt.claim.sub='11111111-1111-1111-1111-111111111111';
 update questions set correct='[0]'::jsonb where id=(select id from questions where is_builtin limit 1);
@@ -18,7 +19,11 @@ reset role; set role authenticated; set request.jwt.claim.sub='22222222-2222-222
 select host_exam((select id from library_exams where slug='html-beginner'),'{}'::jsonb);
 \echo --- 4 admin cannot host a BLOCKED package
 reset role; set role authenticated; set request.jwt.claim.sub='11111111-1111-1111-1111-111111111111';
-select host_exam((select id from library_exams where slug='css-beginner'),'{}'::jsonb);
+reset role;
+insert into library_exams(slug,title,category,difficulty,exam_type,duration_min,pass_pct,target_questions) values ('zz-empty','Broken package','web','beginner','subject',30,50,20);
+select validate_library_exam((select id from library_exams where slug='zz-empty'))::text;
+set role authenticated; set request.jwt.claim.sub='11111111-1111-1111-1111-111111111111';
+select host_exam((select id from library_exams where slug='zz-empty'),'{}'::jsonb);
 \echo --- 5 host HTML Beginner, branch CSE, published, custom title, neg marking
 select id,status,title,total_marks,question_count from host_exam((select id from library_exams where slug='html-beginner'),'{"title":"HTML Mid-term","publish":true,"target_mode":"branch","branches":["CSE"],"negative_marking":0.25,"max_attempts":2,"duration_min":25,"marks_multiplier":2}','{}');
 select 'exam row', title,live,total_min,negative_marking,max_attempts,hosted_id is not null,array_length(question_ids,1) from exams;
@@ -47,3 +52,25 @@ set role authenticated; set request.jwt.claim.sub='11111111-1111-1111-1111-11111
 select status from set_hosted_status((select id from hosted_exams where title like 'Common%'),'cancel');
 reset role;
 select 'after cancel', is_eligible('b@x',(select exam_id from hosted_exams where title like 'Common%')), (select live from exams where title like 'Common%');
+
+\echo --- 10 student attempt lifecycle on the hosted HTML exam (service role, as the Edge Function does)
+reset role;
+select id as hid, exam_id from hosted_exams where title='HTML Mid-term' \gset
+select status from set_hosted_status(:'hid','cancel') limit 0;
+update hosted_exams set status='published' where id=:'hid'; update exams set live=true where id=:'exam_id';
+set role service_role;
+select 'ineligible student b blocked', (select count(*) from (select start_attempt('b@x',:'exam_id',array(select question_id from hosted_exam_questions where hosted_exam_id=:'hid'),'{}')) x);
+select 'eligible student a starts', (start_attempt('a@x',:'exam_id',array(select question_id from hosted_exam_questions where hosted_exam_id=:'hid'),'{}')).attempt_no;
+select 'resume returns same session', (start_attempt('a@x',:'exam_id',array(select question_id from hosted_exam_questions where hosted_exam_id=:'hid'),'{}')).attempt_no;
+reset role;
+update exam_sessions set status='submitted' where email='a@x';
+set role service_role;
+select 'second attempt allowed (max 2)', (start_attempt('a@x',:'exam_id',array(select question_id from hosted_exam_questions where hosted_exam_id=:'hid'),'{}')).attempt_no;
+reset role; update exam_sessions set status='submitted' where email='a@x';
+set role service_role;
+select 'third attempt refused', (select count(*) from (select start_attempt('a@x',:'exam_id',array(select question_id from hosted_exam_questions where hosted_exam_id=:'hid'),'{}')) x);
+reset role;
+\echo --- 11 settings locked once students started
+set role authenticated; set request.jwt.claim.sub='11111111-1111-1111-1111-111111111111';
+select update_hosted_exam(:'hid','{"duration_min":90}'::jsonb);
+select title from update_hosted_exam(:'hid','{"title":"HTML Mid-term (renamed)"}'::jsonb);

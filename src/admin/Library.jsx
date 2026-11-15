@@ -14,32 +14,45 @@ const STC = { draft: '', scheduled: 'b', published: 'g', active: 'g', completed:
 
 // ------------------------------------------------------------------ library browser
 export function Library({ onHost }) {
-  const [rows, setRows] = useState([]), [doms, setDoms] = useState([]), [busy, setBusy] = useState(true), [err, setErr] = useState('')
-  const [s, setS] = useState(''), [cat, setCat] = useState(''), [df, setDf] = useState(''), [dom, setDom] = useState(''), [ready, setReady] = useState(''), [prev, setPrev] = useState(null)
-  useEffect(() => {
-    Promise.all([sb.from('library_exams').select('*').order('category').order('title'), sb.from('domains').select('id,name,slug')]).then(([a, b]) => {
-      if (a.error) setErr(a.error.message.includes('library_exams') ? 'The Exam Library tables are missing. Run supabase/migration_5.sql, the seed files and library/01_exam_packages.sql (see DEPLOYMENT.md).' : a.error.message)
-      setRows(a.data || []); setDoms(b.data || []); setBusy(false)
-    })
-  }, [])
+  const [rows, setRows] = useState([]), [doms, setDoms] = useState([]), [busy, setBusy] = useState(true), [err, setErr] = useState(''), [rv, setRv] = useState(false)
+  const [s, setS] = useState(''), [dom, setDom] = useState(''), [quick, setQuick] = useState('all'), [prev, setPrev] = useState(null)
+  const load = async () => {
+    setBusy(true)
+    const [a, b] = await Promise.all([sb.from('library_exams').select('*').order('category').order('title'), sb.from('domains').select('id,name,slug')])
+    if (a.error) setErr(a.error.message.includes('library_exams') ? 'The Exam Library tables are missing. Run supabase/migration_5.sql, the seed files and library/01_exam_packages.sql (see DEPLOYMENT.md).' : a.error.message); else setErr('')
+    setRows(a.data || []); setDoms(b.data || []); setBusy(false)
+  }
+  useEffect(() => { load() }, [])
+  // Runs the real database validators (validate_all_library_exams) and reloads. Readiness always comes from the database, never from the UI.
+  const revalidate = async () => {
+    setRv(true); const { error } = await sb.rpc('revalidate_library_exams'); setRv(false)
+    if (error) return toast(/FORBIDDEN/.test(error.message) ? 'Only admins can re-validate.' : /revalidate_library_exams/.test(error.message) ? 'Re-validate needs the latest migration_5.sql (see DEPLOYMENT.md).' : error.message, 1)
+    await load(); toast('Validation re-run against the database')
+  }
   const dn = new Map(doms.map(d => [d.id, d.name]))
-  const list = useMemo(() => rows.filter(r => (!s || r.title.toLowerCase().includes(s.toLowerCase())) && (!cat || r.category === cat) && (!df || r.difficulty === df) && (!dom || r.domain_id === dom) && (!ready || r.status === ready)), [rows, s, cat, df, dom, ready])
+  const technical = r => r.category !== 'entrance'
+  const QUICK = [['all', 'All', () => true], ['ready', 'Ready to Host', r => r.status === 'ready'], ['blocked', 'Not Ready', r => r.status !== 'ready'], ['technical', 'Technical', technical], ['entrance', 'Common Entrance', r => !technical(r)],
+    ['beginner', 'Beginner', r => r.difficulty === 'beginner'], ['intermediate', 'Intermediate', r => r.difficulty === 'intermediate'], ['advanced', 'Advanced', r => r.difficulty === 'advanced']]
+  const count = f => rows.filter(f).length
+  const act = QUICK.find(q => q[0] === quick)[2]
+  const list = useMemo(() => rows.filter(r => act(r) && (!s || r.title.toLowerCase().includes(s.toLowerCase())) && (!dom || r.domain_id === dom)), [rows, s, dom, quick])
   const nReady = rows.filter(r => r.status === 'ready').length
-  return <><h1>Exam <em>Library</em></h1><p className="sub">Ready-made examinations with questions, answers and explanations already included. Pick one, set it up and host it. No questions to add or remove. Built-in content is read-only.</p>
+  return <><h1>Exam <em>Library</em></h1><p className="sub">Ready-made examinations with questions, answers and explanations already included. Pick one, set it up and host it. Built-in content is read-only. A package shows <b>Ready to host</b> only when the database validator has passed it.</p>
     <Loading on={busy} />{err && <div className="err">{err}</div>}
-    {!busy && !err && <p className="sub" style={{ marginTop: -8 }}>{rows.length} examinations · <b>{nReady}</b> ready to host{rows.length - nReady > 0 && <> · {rows.length - nReady} not ready (content still being completed)</>}</p>}
+    {!busy && !err && <div className="card" style={{ marginBottom: 14, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div><b style={{ fontSize: 22 }}>{rows.length}</b> packages</div><div><b style={{ fontSize: 22, color: 'var(--ok)' }}>{nReady}</b> ready to host</div><div><b style={{ fontSize: 22, color: rows.length - nReady ? 'var(--err, #c0392b)' : 'inherit' }}>{rows.length - nReady}</b> not ready</div>
+      <div style={{ flex: 1 }} /><button className="btn s alt" disabled={rv} onClick={revalidate}>{rv ? 'Validating…' : 'Re-validate all'}</button></div>}
+    <div className="tiles" style={{ marginBottom: 12, flexWrap: 'wrap' }}>{QUICK.map(([k, l, f]) => <button key={k} className={'btn s ' + (quick === k ? '' : 'alt')} onClick={() => setQuick(k)}>{l} ({count(f)})</button>)}</div>
     <div className="card" style={{ marginBottom: 16 }}><div className="grid g4"><input type="text" placeholder="Search examinations…" value={s} onChange={e => setS(e.target.value)} />
-      <select value={cat} onChange={e => setCat(e.target.value)}><option value="">All categories</option>{Object.entries(CATS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
-      <select value={dom} onChange={e => setDom(e.target.value)}><option value="">All domains</option>{doms.filter(d => rows.some(r => r.domain_id === d.id)).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
-      <select value={df} onChange={e => setDf(e.target.value)}><option value="">All difficulties</option>{Object.entries(DIFF_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
-      <div style={{ marginTop: 10 }}><select value={ready} onChange={e => setReady(e.target.value)} style={{ maxWidth: 240 }}><option value="">Ready and not ready</option><option value="ready">Ready to host only</option><option value="blocked">Not ready only</option></select></div></div>
-    <div className="grid g2">{list.map(r => <div className="card" key={r.id}><div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}><h3 style={{ margin: 0 }}>{r.title}</h3><Chip c={r.status === 'ready' ? 'g' : 'r'}>{r.status === 'ready' ? 'Ready' : 'Not ready'}</Chip></div>
+      <select value={dom} onChange={e => setDom(e.target.value)}><option value="">All domains</option>{doms.filter(d => rows.some(r => r.domain_id === d.id)).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div></div>
+    <div className="grid g2">{list.map(r => { const issues = r.validation?.issues || [], ok = r.status === 'ready'; return <div className="card" key={r.id}><div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}><h3 style={{ margin: 0 }}>{r.title}</h3><Chip c={ok ? 'g' : 'r'}>{ok ? 'Ready to host' : 'Not ready'}</Chip></div>
       <p style={{ color: 'var(--mu)', margin: '6px 0 10px' }}>{r.description}</p>
       <Chip c="b">{CATS[r.category]}</Chip>{r.domain_id && <Chip>{dn.get(r.domain_id)}</Chip>}<Chip c={dChip(r.difficulty)}>{DIFF_LABEL[r.difficulty]}</Chip><Chip>{r.exam_type === 'entrance' ? 'Entrance exam' : r.exam_type === 'section' ? 'Section test' : 'Subject exam'}</Chip>
-      <div style={{ margin: '10px 0', fontSize: 14 }}><b>{r.question_count}</b>{r.question_count !== r.target_questions && <> of {r.target_questions}</>} questions · <b>{+r.total_marks}</b> marks · <b>{r.duration_min}</b> min · pass {r.pass_pct}%</div>
+      <div style={{ margin: '10px 0', fontSize: 14 }}>Questions <b>{r.question_count}</b> / target <b>{r.target_questions}</b> · <b>{+r.total_marks}</b> marks · <b>{r.duration_min}</b> min · pass {r.pass_pct}%</div>
       {r.sections?.length > 1 && <div style={{ marginBottom: 8 }}>{r.sections.map(x => <Chip key={x.name}>{x.name}: {x.questions}</Chip>)}</div>}
-      {r.status !== 'ready' && <div className="note" style={{ fontSize: 13 }}>Cannot be hosted yet: {r.validation?.issues?.[0]?.detail || 'not validated'}.</div>}
-      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}><button className="btn s alt" onClick={() => setPrev(r)}>Preview</button><button className="btn s" disabled={r.status !== 'ready'} onClick={() => onHost(r)}>Host Exam</button></div></div>)}</div>
+      {!ok && <div className="err" style={{ fontSize: 13 }}><b>Cannot be hosted:</b>{issues.length ? <ul style={{ margin: '4px 0 0 16px' }}>{issues.slice(0, 4).map((i, k) => <li key={k}>{i.detail}</li>)}{issues.length > 4 && <li>…and {issues.length - 4} more</li>}</ul> : ' not validated yet. Click Re-validate all.'}</div>}
+      {r.validated_at && <div style={{ fontSize: 12, color: 'var(--mu)' }}>Validated {new Date(r.validated_at).toLocaleString()}</div>}
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}><button className="btn s alt" onClick={() => setPrev(r)}>Preview</button><button className="btn s" disabled={!ok} onClick={() => onHost(r)}>Host Exam</button></div></div> })}</div>
     {!list.length && !busy && !err && <div className="card">No examinations match these filters.</div>}
     {prev && <Preview lib={prev} onClose={() => setPrev(null)} onHost={() => { onHost(prev); setPrev(null) }} />}</>
 }
