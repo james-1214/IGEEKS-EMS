@@ -7,8 +7,9 @@ import {ExamForm,ExamList} from './Exams'
 import Analytics from './Analytics'
 import People from './People'
 import {Results,Review} from './Legacy'
+import {Library,HostWizard,Hosted} from './Library'
 
-const NAV = [['dash', 'Dashboard'], ['students', 'Students'], ['domains', 'Domains'], ['qbank', 'Question Bank'], ['create', 'Create Exam'], ['exams', 'Manage Exams'], ['analytics', 'Exam Analytics'], ['perf', 'Student Performance'], ['results', 'Results & Excel'], ['review', 'Code Review'], ['settings', 'Settings']]
+const NAV = [['dash', 'Dashboard'], ['students', 'Students'], ['domains', 'Domains'], ['library', 'Exam Library'], ['hosted', 'Hosted Exams'], ['qbank', 'Question Bank'], ['create', 'Custom Exam'], ['exams', 'Manage Exams'], ['analytics', 'Exam Analytics'], ['perf', 'Student Performance'], ['results', 'Results & Excel'], ['review', 'Code Review'], ['settings', 'Settings']]
 
 function useStats() {
   const [d, setD] = useState({ loading: true, doms: [], qs: [], exams: 0, students: 0, attempts: [], })
@@ -20,7 +21,7 @@ function useStats() {
 
 function Dashboard({ go }) {
   const d = useStats(), n = d.attempts.length, avg = n ? Math.round(d.attempts.reduce((t, r) => t + r.pct, 0) / n) : 0
-  return <><h1>Admin <em>dashboard</em></h1><p className="sub">A quick look at your platform.</p><Loading on={d.loading} />
+  return <><h1>Admin <em>dashboard</em></h1><p className="sub">A quick look at your platform. To run an exam, open <a href="#x" onClick={e => { e.preventDefault(); go('library') }}>Exam Library</a>.</p><Loading on={d.loading} />
     <div className="grid g4" style={{ marginBottom: 20 }}><Kpi label="Students" value={d.students} /><Kpi label="Exams" value={d.exams} /><Kpi label="Questions" value={d.qs.length} /><Kpi label="Attempts" value={n} /><Kpi label="Average score" value={avg + '%'} /><Kpi label="Pass rate" value={(n ? Math.round(d.attempts.filter(r => r.passed).length / n * 100) : 0) + '%'} /></div>
     <div className="grid g2"><div className="card"><h2>Question bank coverage</h2>{d.doms.map(x => { const c = d.qs.filter(q => q.domain_id === x.id).length; return <div className="row" key={x.id} style={{ padding: '8px 0' }}><span>{x.name}</span><span><Chip c={c >= MIN_PER_DOMAIN ? 'g' : 'r'}>{c} / {MIN_PER_DOMAIN}</Chip></span></div> })}</div>
       <div className="card"><h2>Recent attempts</h2>{d.attempts.slice(0, 10).map(r => <div className="row" key={r.id} style={{ padding: '8px 0' }}><span>{r.students?.name || r.student_email}<br /><small style={{ color: 'var(--mu)' }}>{r.exam_title} · attempt {r.attempt_no}</small></span><span><Chip c={r.passed ? 'g' : 'r'}>{r.pct}%</Chip></span></div>)}{!n && !d.loading && <p className="sub">No attempts yet.</p>}
@@ -42,15 +43,15 @@ function Settings({ user, out }) {
 }
 
 export default function Admin() {
-  const [user, setUser] = useState(null), [ok, setOk] = useState(null), [em, setEm] = useState(''), [pw, setPw] = useState(''), [err, setErr] = useState(''), [page, setPage] = useState('dash'), [ctx, setCtx] = useState({}), [edit, setEdit] = useState(null), [doms, setDoms] = useState([])
+  const [user, setUser] = useState(null), [ok, setOk] = useState(null), [em, setEm] = useState(''), [pw, setPw] = useState(''), [err, setErr] = useState(''), [page, setPage] = useState('dash'), [ctx, setCtx] = useState({}), [edit, setEdit] = useState(null), [hostLib, setHostLib] = useState(null), [doms, setDoms] = useState([])
   useEffect(() => { sb.auth.getSession().then(({ data }) => setUser(data.session?.user || null)) }, [])
   useEffect(() => { if (!user) return; sb.rpc('is_admin').then(({ data }) => setOk(!!data)); sb.from('domains').select('*').order('sort').then(({ data }) => setDoms(data || [])) }, [user])
   const login = async () => { setErr(''); const { data, error } = await sb.auth.signInWithPassword({ email: em, password: pw }); error ? setErr(error.message) : setUser(data.user) }
   const out = () => sb.auth.signOut().then(() => { setUser(null); setOk(null) })
-  const go = (p, c = {}) => { setPage(p); setCtx(c); if (p !== 'create') setEdit(null) }
+  const go = (p, c = {}) => { setPage(p); setCtx(c); setHostLib(null); if (p !== 'create') setEdit(null) }
   if (!user) return <div className="narrow card"><h1>Admin <em>sign in</em></h1><label className="f">Email</label><input type="email" value={em} onChange={e => setEm(e.target.value)} /><label className="f">Password</label><input type="password" value={pw} onChange={e => setPw(e.target.value)} onKeyDown={e => e.key === 'Enter' && login()} />{err && <div className="err">{err}</div>}<button className="btn" onClick={login}>Sign in</button></div>
   if (ok === false) return <div className="narrow card"><h1>No <em>access</em></h1><p className="sub">{user.email} is not an admin. Add this user to the admins table in Supabase, then sign in again.</p><button className="btn alt" onClick={out}>Sign out</button></div>
-  const view = { dash: <Dashboard go={go} />, students: <People mode="students" ctx={ctx} />, domains: <Domains go={go} />, qbank: <QuestionBank ctx={ctx} />, create: <ExamForm key={edit?.id || 'new'} domains={doms} edit={edit} onDone={() => go('exams')} />, exams: <ExamList domains={doms} onEdit={x => { setEdit(x); setPage('create') }} />,
+  const view = { library: hostLib ? <HostWizard lib={hostLib} onCancel={() => setHostLib(null)} onDone={() => go('hosted')} /> : <Library onHost={setHostLib} />, hosted: <Hosted goLibrary={() => go('library')} />, dash: <Dashboard go={go} />, students: <People mode="students" ctx={ctx} />, domains: <Domains go={go} />, qbank: <QuestionBank ctx={ctx} />, create: <ExamForm key={edit?.id || 'new'} domains={doms} edit={edit} onDone={() => go('exams')} />, exams: <ExamList domains={doms} onEdit={x => { setEdit(x); setPage('create') }} />,
     analytics: <Analytics ctx={ctx} />, perf: <People mode="performance" ctx={ctx} />, results: <><h1>Results & <em>Excel</em></h1><p className="sub">Every attempt, sorted by score, date or month, with the full workbook download.</p><LegacyResults /></>, review: <LegacyReview />, settings: <Settings user={user} out={out} /> }[page]
   return <div className="adm"><nav className="side" aria-label="Admin">{NAV.map(([k, l]) => <button key={k} className={page === k ? 'on' : ''} onClick={() => go(k)}>{l}</button>)}</nav><div style={{ minWidth: 0 }}>{view}</div></div>
 }

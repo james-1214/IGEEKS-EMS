@@ -1,4 +1,5 @@
 # IGEEKS Test System (React + Supabase + Nodemailer SMTP)
+> **Exam Library + Host Exam:** see `DEPLOYMENT.md`, `docs/CONTENT_QUALITY_REPORT.md` and `docs/TEST_REPORT.md`. Run `supabase/migration_5.sql` after the earlier migrations.
 1. Supabase: create a project. SQL Editor: run `supabase/schema.sql`.
 2. Authentication > Users: add your admin (email + password). Then run `insert into admins values ('USER-UUID');`
 3. Email (Nodemailer over SMTP): see the Email section below.
@@ -41,7 +42,7 @@ Run after `migration_4.sql`. Either paste `supabase/seed_questions.sql` into the
 - Types: single choice, multi select, true/false, output-based, debugging, conceptual, scenario.
 - 15 coding problems (Java, Python, C++, C, C#, .NET, JavaScript, Node.js) with 5 tests each: 2 shown as samples, 3 hidden.
 - HTML, CSS, MongoDB, Express.js and Angular cannot be run in Judge0, so they use output-based, debugging and scenario questions instead of coding.
-- Source and generator: `tools/question_bank/` (edit the .py files, run `python3 gen.py`).
+- Source and generator: `tools/question_bank/` (edit the .py files, run `python3 build.py`).
 
 ## Phase 3: admin screens
 Admin sign-in now opens a sidebar with: Dashboard, Students, Domains, Question Bank, Create Exam, Manage Exams, Exam Analytics, Student Performance, Results & Excel (the earlier results page), Code Review and Settings.

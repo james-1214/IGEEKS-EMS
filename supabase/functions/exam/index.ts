@@ -40,11 +40,13 @@ function grade(q: any, a: any): number | null {
 
 async function loadTests(codeIds: string[], qs: any[]) {
   const map: Record<string, any[]> = {}
-  if (codeIds.length) {
-    const { data } = await sb.from('coding_tests').select('question_id,input,expected,is_hidden,position').in('question_id', codeIds).order('position')
+  for (const q of qs) if (q._tests) map[q.id] = q._tests.map((t: any) => ({ in: t.in, out: t.out, hidden: t.hidden }))
+  const dbIds = codeIds.filter(id => !map[id])
+  if (dbIds.length) {
+    const { data } = await sb.from('coding_tests').select('question_id,input,expected,is_hidden,position').in('question_id', dbIds).order('position')
     for (const t of data || []) (map[t.question_id] ||= []).push({ in: t.input, out: t.expected, hidden: t.is_hidden })
   }
-  for (const q of qs) if (q.type === 'code' && !map[q.id]?.length) { // older questions kept tests in meta
+  for (const q of qs) if (q.type === 'code' && !q._tests && !map[q.id]?.length) { // older questions kept tests in meta
     const m = q.meta?.tests || [], half = Math.ceil(m.length / 2)
     map[q.id] = m.map((t: any, i: number) => ({ in: t.in, out: t.out, hidden: i >= half }))
   }
@@ -63,6 +65,20 @@ async function gradeCode(lang: string, code: string, tests: any[]) {
     time_ms: Math.round(Math.max(0, ...r.map(x => Number(x.time) || 0)) * 1000), memory_kb: Math.max(0, ...r.map(x => Number(x.memory) || 0)) }
 }
 
+// Hosted exams are served from their frozen snapshot, never from the live question bank.
+async function qRows(ex: any, ids: string[]): Promise<any[]> {
+  if (!ids.length) return []
+  if (ex.hosted_id) {
+    const { data } = await sb.from('hosted_exam_questions').select('question_id,section,snapshot,tests').eq('hosted_exam_id', ex.hosted_id).in('question_id', ids)
+    return (data || []).map((r: any) => ({ ...r.snapshot, id: r.question_id, section: r.section, _tests: r.tests || [] }))
+  }
+  const { data } = await sb.from('questions').select('*').in('id', ids)
+  return data || []
+}
+async function getExam(id: string) {
+  const { data } = await sb.from('exams').select('*').eq('id', id).single()
+  return data
+}
 async function getSession(id: string, email: string) {
   const { data } = await sb.from('exam_sessions').select('*').eq('id', id).eq('email', email).maybeSingle()
   if (!data) throw new Bad('Attempt not found.', 404)
@@ -85,7 +101,7 @@ async function pickQuestions(ex: any): Promise<string[]> {
 // ---- score an attempt on the server and store it (used for manual and automatic submit)
 async function submitSession(s: any, status: 'submitted' | 'auto_submitted', current?: { question_id: string; answer: any }) {
   const { data: ex } = await sb.from('exams').select('*').eq('id', s.exam_id).single()
-  const { data: qrows } = await sb.from('questions').select('*').in('id', s.question_ids)
+  const qrows = await qRows(ex, s.question_ids)
   const qm = new Map((qrows || []).map((q: any) => [q.id, q]))
   const late = Date.now() > new Date(s.deadline_at).getTime() + 30000
   const ans: Record<string, any> = { ...s.answers }
@@ -95,10 +111,10 @@ async function submitSession(s: any, status: 'submitted' | 'auto_submitted', cur
   }
   const tmap = await loadTests((qrows || []).filter((q: any) => q.type === 'code').map((q: any) => q.id), qrows || [])
   let score = 0, max = 0, pending = 0, correct = 0, wrong = 0, unans = 0
-  const rows: any[] = [], codes: any[] = [], det: any[] = [], show = solutionsVisible(ex)
+  const rows: any[] = [], codes: any[] = [], det: any[] = [], show = solutionsVisible(ex), secs: Record<string, any> = {}
   for (let i = 0; i < s.question_ids.length; i++) {
     const qid = s.question_ids[i], q: any = qm.get(qid); if (!q) continue
-    const a = ans[qid], snap = { type: q.type, category: q.category, difficulty: q.difficulty, text: q.text, options: q.options, correct: q.correct, explanation: q.explanation, marks: q.marks, statement: q.statement }
+    const a = ans[qid], snap = { section: q.section, type: q.type, category: q.category, difficulty: q.difficulty, text: q.text, options: q.options, correct: q.correct, explanation: q.explanation, marks: q.marks, statement: q.statement }
     let ok: boolean | null = null, marks = 0, mx = q.marks, note = '', cr: any = null, v = ''
     if (isEmpty(a)) { unans++; v = 'Unanswered' }
     else if (q.type === 'code') {
@@ -113,6 +129,7 @@ async function submitSession(s: any, status: 'submitted' | 'auto_submitted', cur
       ok = grade(q, a) === 1; marks = ok ? q.marks : -Number(ex.negative_marking) * q.marks; ok ? correct++ : wrong++; v = ok ? 'Correct' : 'Wrong'
     }
     score += marks; max += mx
+    if (q.section) { const z = (secs[q.section] ||= { name: q.section, earned: 0, max: 0, correct: 0, total: 0 }); z.earned += marks; z.max += mx; z.total++; if (ok) z.correct++ }
     rows.push({ question_id: qid, position: i + 1, snapshot: snap, answer: a ?? null, is_correct: ok, marks_awarded: marks, max_marks: mx, flagged: !!s.flags?.[qid], code_result: cr })
     det.push({ text: q.text, v, note, marks, max: mx, ...(show ? { explanation: q.explanation, correct: ansText(q, q.correct) } : {}) })
   }
@@ -125,7 +142,8 @@ async function submitSession(s: any, status: 'submitted' | 'auto_submitted', cur
   const { count: hi } = await sb.from('attempts').select('*', { count: 'exact', head: true }).eq('exam_id', ex.id).gt('pct', pct)
   const { count: all } = await sb.from('attempts').select('*', { count: 'exact', head: true }).eq('exam_id', ex.id)
   return { score, max, pct, passed, pending, need: ex.pass_pct, correct, wrong, unanswered: unans, time_taken: took, late, attempt_no: s.attempt_no,
-    attempts_left: Math.max(0, ex.max_attempts - s.attempt_no), rank: (hi || 0) + 1, of: all, auto: status === 'auto_submitted', det }
+    attempts_left: Math.max(0, ex.max_attempts - s.attempt_no), rank: (hi || 0) + 1, of: all, auto: status === 'auto_submitted', det,
+    sections: Object.values(secs).map((z: any) => ({ ...z, earned: Math.max(0, Math.round(z.earned * 100) / 100) })) }
 }
 
 Deno.serve(async (req) => {
@@ -137,20 +155,38 @@ Deno.serve(async (req) => {
 
     // ---------- exams the student can see, with attempts used and left
     if (b.action === 'list_exams') {
-      const [{ data: exams }, { data: sess }, { data: atts }, { data: doms }] = await Promise.all([
-        sb.from('exams').select('id,title,description,domain,domain_id,mode,total_min,per_sec,pass_pct,max_switches,max_attempts,start_at,end_at,question_ids,selection_mode,difficulty_mix,show_solutions').eq('live', true),
+      const [{ data: exams }, { data: sess }, { data: atts }, { data: doms }, { data: stu }] = await Promise.all([
+        sb.from('exams').select('id,title,description,domain,domain_id,mode,total_min,per_sec,pass_pct,max_switches,max_attempts,start_at,end_at,question_ids,selection_mode,difficulty_mix,show_solutions,hosted_id,require_fullscreen,ai_proctoring').eq('live', true),
         sb.from('exam_sessions').select('exam_id,status,attempt_no').eq('email', email),
         sb.from('attempts').select('id,exam_id,attempt_no,pct,passed,submitted_at').eq('student_email', email),
-        sb.from('domains').select('id,name')])
+        sb.from('domains').select('id,name'),
+        sb.from('students').select('email,branch').eq('email', email).maybeSingle()])
+      const hids = (exams || []).map((e: any) => e.hosted_id).filter(Boolean)
+      const [{ data: hs }, { data: mine }, { data: hq }] = hids.length ? await Promise.all([
+        sb.from('hosted_exams').select('id,status,target_mode,branches,instructions,total_marks,question_count').in('id', hids),
+        sb.from('hosted_exam_students').select('hosted_exam_id').eq('email', email).in('hosted_exam_id', hids),
+        sb.from('hosted_exam_questions').select('hosted_exam_id,section').in('hosted_exam_id', hids)]) : [{ data: [] }, { data: [] }, { data: [] }]
+      const hm = new Map((hs || []).map((h: any) => [h.id, h])), picked = new Set((mine || []).map((m: any) => m.hosted_exam_id))
+      const branch = String(stu?.branch || '').trim().toLowerCase()
+      const eligible = (e: any) => {
+        if (!e.hosted_id) return true
+        const h: any = hm.get(e.hosted_id); if (!h || !['scheduled', 'published'].includes(h.status)) return false
+        if (h.target_mode === 'all') return true
+        if (h.target_mode === 'branch') return (h.branches || []).some((x: string) => x.trim().toLowerCase() === branch)
+        return picked.has(h.id)
+      }
       const dn = new Map((doms || []).map((d: any) => [d.id, d.name]))
-      return J({ exams: (exams || []).map((e: any) => {
+      return J({ exams: (exams || []).filter(eligible).map((e: any) => {
         const my = (atts || []).filter((a: any) => a.exam_id === e.id), ss = (sess || []).filter((x: any) => x.exam_id === e.id)
         const used = Math.max(...ss.map((x: any) => x.attempt_no), ...my.map((a: any) => a.attempt_no), 0), now = Date.now()
         const window = e.start_at && now < new Date(e.start_at).getTime() ? 'upcoming' : e.end_at && now > new Date(e.end_at).getTime() ? 'ended' : 'open'
-        const { question_ids, selection_mode, difficulty_mix, ...pub } = e
+        const h: any = e.hosted_id ? hm.get(e.hosted_id) : null
+        const sections = h ? Object.entries((hq || []).filter((r: any) => r.hosted_exam_id === h.id).reduce((m: any, r: any) => (m[r.section] = (m[r.section] || 0) + 1, m), {})).map(([name, count]) => ({ name, count })) : []
+        const { question_ids, selection_mode, difficulty_mix, hosted_id, ...pub } = e
         return { ...pub, domain: dn.get(e.domain_id) || e.domain, window, attempts_used: used, attempts_left: Math.max(0, e.max_attempts - used),
           in_progress: ss.some((x: any) => x.status === 'in_progress'), best_pct: my.length ? Math.max(...my.map((a: any) => a.pct)) : null,
-          total_questions: selection_mode === 'auto' ? Object.values(difficulty_mix || {}).reduce((t: number, n: any) => t + Number(n || 0), 0) : question_ids.length }
+          total_questions: h ? h.question_count : selection_mode === 'auto' ? Object.values(difficulty_mix || {}).reduce((t: number, n: any) => t + Number(n || 0), 0) : question_ids.length,
+          total_marks: h?.total_marks ?? null, instructions: h?.instructions ?? null, sections, hosted: !!h }
       }) })
     }
 
@@ -160,6 +196,7 @@ Deno.serve(async (req) => {
       if (!ex) throw new Bad('Exam not found.', 404)
       const { data: stu } = await sb.from('students').select('email').eq('email', email).maybeSingle()
       if (!stu) throw new Bad('Save your details before starting an exam.')
+      { const { data: okEl } = await sb.rpc('is_eligible', { p_email: email, p_exam: ex.id }); if (!okEl) throw new Bad('You are not eligible for this exam.', 403) }
       const { data: act } = await sb.from('exam_sessions').select('*').eq('email', email).eq('exam_id', ex.id).eq('status', 'in_progress').maybeSingle()
       if (act && Date.now() > new Date(act.deadline_at).getTime()) { // time ran out while the student was away
         return J({ auto_submitted: true, result: await submitSession(act, 'auto_submitted') })
@@ -168,33 +205,33 @@ Deno.serve(async (req) => {
       if (!act) {
         qids = await pickQuestions(ex)
         if (ex.shuffle_options) {
-          const { data: qt } = await sb.from('questions').select('id,type,options').in('id', qids)
-          for (const q of qt || []) if (isChoice(q) && q.options?.length) orders[q.id] = shuffle([...Array(q.options.length).keys()])
+          const qt = await qRows(ex, qids)
+          for (const q of qt) if (isChoice(q) && q.options?.length) orders[q.id] = shuffle([...Array(q.options.length).keys()])
         }
       }
       const { data: s, error } = await sb.rpc('start_attempt', { p_email: email, p_exam: ex.id, p_qids: qids, p_orders: orders })
       if (error) {
-        const m = String(error.message), map: Record<string, string> = { NO_ATTEMPTS_LEFT: 'You have used all attempts for this exam.', EXAM_NOT_STARTED: 'This exam has not opened yet.', EXAM_ENDED: 'This exam has closed.', EXAM_NOT_AVAILABLE: 'Exam not available.', EXAM_HAS_NO_QUESTIONS: 'This exam has no questions yet.' }
+        const m = String(error.message), map: Record<string, string> = { NO_ATTEMPTS_LEFT: 'You have used all attempts for this exam.', EXAM_NOT_STARTED: 'This exam has not opened yet.', EXAM_ENDED: 'This exam has closed.', EXAM_NOT_AVAILABLE: 'Exam not available.', EXAM_HAS_NO_QUESTIONS: 'This exam has no questions yet.', NOT_ELIGIBLE: 'You are not eligible for this exam.' }
         const k = Object.keys(map).find(x => m.includes(x)); if (k) throw new Bad(map[k], 403); console.error(error); throw new Error('start')
       }
-      const { data: qrows } = await sb.from('questions').select('*').in('id', s.question_ids)
+      const qrows = await qRows(ex, s.question_ids)
       const qm = new Map((qrows || []).map((q: any) => [q.id, q]))
       const tmap = await loadTests((qrows || []).filter((q: any) => q.type === 'code').map((q: any) => q.id), qrows || [])
       const questions = s.question_ids.map((id: string) => qm.get(id)).filter(Boolean).map((q: any) => ({
-        id: q.id, type: q.type, category: q.category, difficulty: q.difficulty, title: q.title, text: q.text, marks: q.marks,
+        id: q.id, section: q.section, type: q.type, category: q.category, difficulty: q.difficulty, title: q.title, text: q.text, marks: q.marks,
         options: dispOptions(q, s.option_orders?.[q.id]), statement: q.statement,
         ...(q.type === 'code' ? { languages: allowedLangs(q), starter: q.meta?.starter, samples: (tmap[q.id] || []).filter((t: any) => !t.hidden).map((t: any) => ({ in: t.in, out: t.out })) } : {}) }))
       const answers: Record<string, any> = {}
       for (const [qid, a] of Object.entries(s.answers || {})) answers[qid] = toDisp(qm.get(qid), s.option_orders?.[qid], a)
       return J({ session_id: s.id, attempt_no: s.attempt_no, attempts_left: Math.max(0, ex.max_attempts - s.attempt_no), resumed: !!act,
         remaining: secsTo(s.deadline_at), deadline_at: s.deadline_at, server_now: new Date().toISOString(),
-        exam: { id: ex.id, title: ex.title, mode: ex.mode, per_sec: ex.per_sec, total_min: ex.total_min, pass_pct: ex.pass_pct, max_switches: ex.max_switches, negative_marking: ex.negative_marking },
+        exam: { id: ex.id, title: ex.title, mode: ex.mode, per_sec: ex.per_sec, total_min: ex.total_min, pass_pct: ex.pass_pct, max_switches: ex.max_switches, negative_marking: ex.negative_marking, require_fullscreen: ex.require_fullscreen !== false, ai_proctoring: !!ex.ai_proctoring, shuffle: ex.shuffle, hosted: !!ex.hosted_id },
         questions, answers, flags: s.flags, visited: s.visited })
     }
 
     // ---------- autosave one answer / review flag / visit
     if (b.action === 'save_progress') {
-      const s = await getSession(b.session_id, email), q: any = (await sb.from('questions').select('id,type,options').eq('id', b.question_id).maybeSingle()).data
+      const s = await getSession(b.session_id, email), sx = await getExam(s.exam_id), q: any = (await qRows(sx, [b.question_id]))[0]
       if (!q || !s.question_ids.includes(b.question_id)) throw new Bad('Question not in this attempt.')
       let ans = null
       if (b.answer !== undefined && b.answer !== null && !b.clear) {
@@ -224,7 +261,8 @@ Deno.serve(async (req) => {
       const s = await getSession(b.session_id, email)
       if (s.status !== 'in_progress' || Date.now() > new Date(s.deadline_at).getTime() + 30000) throw new Bad('The exam time is over.')
       if (!s.question_ids.includes(b.question_id)) throw new Bad('Question not in this attempt.')
-      const { data: q } = await sb.from('questions').select('*').eq('id', b.question_id).single()
+      const q: any = (await qRows(await getExam(s.exam_id), [b.question_id]))[0]
+      if (!q) throw new Bad('Question not in this attempt.')
       if (q.type !== 'code') throw new Bad('Not a coding question.')
       const lang = String(b.language || allowedLangs(q)[0]); if (!allowedLangs(q).includes(lang)) throw new Bad('Language not allowed for this question.')
       const code = String(b.code ?? ''); if (!code.trim()) throw new Bad('Write some code first.'); if (code.length > 20000) throw new Bad('Code is too long.')

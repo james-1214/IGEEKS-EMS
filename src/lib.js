@@ -5,3 +5,7 @@ if(data?.error)throw new Error(data.error);if(error){let m=error.message;try{m=(
 export const DOMAINS=['Data Science & Machine Learning','Full Stack Developer','Data Analytics','Cyber Security','AI & Generative AI Intern','AI Product Developer Intern','Business Analytics','Business Development','Electronic Circuit & PCB Design','Embedded Systems & IoT','VLSI Design','EV Power Electronics & Energy Systems']
 export const TN={mcq:'Single choice',multi:'Multi select',tf:'True / False',short:'Short answer',code:'Coding'}
 export * from './excel'
+
+// Phase-2 exam engine (sessions, autosave, hosted exams). Same error handling as call().
+export async function callExam(action,body={}){const {data,error}=await sb.functions.invoke('exam',{body:{action,...body}})
+if(data?.error)throw new Error(data.error);if(error){let m=error.message;try{m=(await error.context.json()).error||m}catch{}throw new Error(m)}return data}
