@@ -28,3 +28,8 @@ Environment: PostgreSQL 16 with a minimal Supabase shim (roles `anon`, `authenti
 - Coding questions were not compiled or run in Judge0; expected outputs come from Python reference solutions.
 - AI proctoring is a stored setting passed to the exam screen. No proctoring vendor is integrated.
 - Row Level Security was tested through the admin trigger/RPC paths, not through PostgREST with real JWTs.
+
+
+## Camera / coding pass
+- `supabase/tests/coding_camera_tests.sql`: classifier, policy propagation, bad policy rejected, rules locked after start, non-admin sees 0 photos, admin sees them, frozen coding snapshot has starters and hidden tests.
+- `tests/e2e/`: 38 browser checks in Firefox with a fake webcam (stub backend). The real Edge Function was not run.

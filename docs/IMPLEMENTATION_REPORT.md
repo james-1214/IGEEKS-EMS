@@ -22,3 +22,23 @@ This was reproduced with the migrations in both orders (`migration_5_exam_librar
 Admin: filter chips with live counts (All, Ready to Host, Not Ready, Technical, Common Entrance, Beginner, Intermediate, Advanced), target vs actual counts, marks, up to four validation issues per blocked package, and Re-validate all. "Ready to host" is shown only when the database status is `ready`; the UI never computes it. The student screen uses the session-based `exam` function (same engine as the admin side); correct answers are not sent before submission (unchanged from the previous delivery).
 Tested in SQL: only admins can host, a blocked package cannot be hosted, branch/selected targeting, frozen snapshot, eligibility enforced inside `start_attempt`, resume of the same session, second attempt allowed and third refused at `max_attempts = 2`, scoring settings locked once students start, cancel removes access.
 **Not tested:** the Edge Function submit/evaluate/result path and the student UI in a browser (no Deno, no live project). Run one hosted exam end to end on a test project before real use.
+
+
+# Addendum: camera, lockdown, coding policy, 60-question exam
+## Root causes
+- **Camera not activating:** there was no camera code at all (the earlier `ai_proctoring` flag only stored a setting). Built from scratch: `src/camera.js`, a camera check before start, live preview, snapshots every ~30 s, an examiner viewer, and specific error messages.
+- **Safe browser not working properly:** the in-browser lockdown had real faults. `window.blur` counted as a violation, so the browser's own camera-permission prompt would have cost students a strike; fullscreen failure on iPhone/iPad was silent; there was no refresh guard; the rules text claimed developer tools were blocked. Fixed (grace window around the permission prompt, blur must persist 0.7 s without focus, `beforeunload` guard, explicit unsupported-fullscreen message, honest wording). Also added an optional Safe Exam Browser user-agent check.
+- Two bugs of my own were found by the browser tests and fixed: the preview video was read before React attached the stream (camera check would always fail), and the client read the coding rule from the wrong object.
+
+## New and changed
+`supabase/migration_6.sql` (new) · `supabase/functions/exam/index.ts` (coding rule, scoring of skipped optional coding, `proctor_snap` / `proctor_event`, SEB check, coding info in start response) · `src/camera.js` (new) · `src/Student.jsx` · `src/admin/Library.jsx` (camera/SEB toggles, coding policy panel with live branch classification, Proctoring viewer) · `tools/question_bank/x_coding.py` (10 coding problems) · `build.py` (new package) · `supabase/tests/coding_camera_tests.sql` · `tests/e2e/*`.
+
+## Verified (real runs)
+- Database: 53 of 53 packages ready, incl. the new one (60 questions, 100 marks, 10 coding with 5 tests each, 3 hidden); policy and camera/SEB settings carried to the exam row; classifier correct on 12 branch names; rules lock once a student starts; only admins can read photos.
+- Coding content: each of the 10 problems has a Python reference and an independent JavaScript solution that agree on all 50 test runs. They were **not** run through Judge0 in Python/Java/C/C++, so the starters and your Judge0 setup are untested for those languages.
+- Browser (Firefox, fake webcam): camera works, blocked-permission and no-camera messages are correct, and 38 checks pass across an engineering and a non-engineering student (camera gate, live preview, JPEG snapshot upload, autosave, coding banner, language picker, mandatory-coding submit block vs optional submit).
+
+## Not verified
+- The updated Edge Function was type-checked only (no Deno). The browser tests used a stub that imitates it, so the real server-side rule, snapshot storage and SEB check are untested. The two TypeScript warnings reported by `tsc` also exist in your original upload.
+- Chrome, Edge, Safari and mobile browsers were not tested (Firefox only). Headless Firefox cannot show the real permission prompt, so the prompt-focus grace window is by design, not by test.
+- No face detection beyond the optional browser FaceDetector (rarely enabled); "dark picture" detection is the only automatic check.

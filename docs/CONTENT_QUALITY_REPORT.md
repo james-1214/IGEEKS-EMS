@@ -1,12 +1,12 @@
 # IGEEKS EMS – Content Quality Report
-Generated 2026-11-15 19:15 by `tools/question_bank/build.py`
+Generated 2026-11-17 05:12 by `tools/question_bank/build.py`
 
 ## Summary
-- Built-in questions: **1211** (original 329 preserved + 882 new)
+- Built-in questions: **1221** (original 329 preserved + 892 new)
 - Question-level validation failures: **0**
 - Exact duplicates inside a domain: **0**; near-duplicates (>=88% similar text): **16**; exact duplicates across domains: **1**
 - New questions skipped because the same stem already existed: **22**
-- Exam packages: **52 READY**, **0 BLOCKED** of 52
+- Exam packages: **53 READY**, **0 BLOCKED** of 53
 - Content still needed: **394** questions for 30/30/30 in every subject domain; **0** to make every 20-question subject package READY. BLOCKED packages cannot be hosted.
 - MCQ answer-position spread (A,B,C,D): [276, 276, 277, 295]; correct option is the longest in 46% of 1124 MCQs
 
@@ -88,6 +88,7 @@ Generated 2026-11-15 19:15 by `tools/question_bank/build.py`
 | Common Entrance – Logical Reasoning Section Test | 25/25 | 25 | **READY** |  |
 | Common Entrance – Verbal Ability Section Test | 25/25 | 25 | **READY** |  |
 | Common Entrance – Analytical Thinking Section Test | 25/25 | 25 | **READY** |  |
+| Aptitude & Coding Assessment (60 Questions) | 60/60 | 100 | **READY** |  |
 
 ## How correctness is checked
 - Structure (every question): valid options, valid answer indexes, explanation present, no placeholder text, no `$q$` delimiter, topic present. Mirrors `question_problems()` in migration_5.sql, which re-checks inside the database.

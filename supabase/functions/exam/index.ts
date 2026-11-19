@@ -65,6 +65,16 @@ async function gradeCode(lang: string, code: string, tests: any[]) {
     time_ms: Math.round(Math.max(0, ...r.map(x => Number(x.time) || 0)) * 1000), memory_kb: Math.max(0, ...r.map(x => Number(x.memory) || 0)) }
 }
 
+// Coding rule. policy: required_all (legacy default) | required_engineering | optional.
+// A student is "required" when the policy says so for their branch; otherwise coding is optional and skipping it costs nothing.
+async function codingRule(ex: any, email: string) {
+  const policy = ex.coding_policy || 'required_all'
+  if (policy === 'required_all') return { policy, required: true, min: ex.coding_min || 0, engineering: null as boolean | null }
+  if (policy === 'optional') return { policy, required: false, min: 0, engineering: null as boolean | null }
+  const { data: st } = await sb.from('students').select('branch').eq('email', email).maybeSingle()
+  const { data: eng } = await sb.rpc('is_engineering_branch', { p_branch: st?.branch || '', p_custom: ex.coding_branches || [] })
+  return { policy, required: !!eng, min: eng ? (ex.coding_min || 0) : 0, engineering: !!eng }
+}
 // Hosted exams are served from their frozen snapshot, never from the live question bank.
 async function qRows(ex: any, ids: string[]): Promise<any[]> {
   if (!ids.length) return []
@@ -101,6 +111,7 @@ async function pickQuestions(ex: any): Promise<string[]> {
 // ---- score an attempt on the server and store it (used for manual and automatic submit)
 async function submitSession(s: any, status: 'submitted' | 'auto_submitted', current?: { question_id: string; answer: any }) {
   const { data: ex } = await sb.from('exams').select('*').eq('id', s.exam_id).single()
+  const rule = await codingRule(ex, s.email)
   const qrows = await qRows(ex, s.question_ids)
   const qm = new Map((qrows || []).map((q: any) => [q.id, q]))
   const late = Date.now() > new Date(s.deadline_at).getTime() + 30000
@@ -116,7 +127,8 @@ async function submitSession(s: any, status: 'submitted' | 'auto_submitted', cur
     const qid = s.question_ids[i], q: any = qm.get(qid); if (!q) continue
     const a = ans[qid], snap = { section: q.section, type: q.type, category: q.category, difficulty: q.difficulty, text: q.text, options: q.options, correct: q.correct, explanation: q.explanation, marks: q.marks, statement: q.statement }
     let ok: boolean | null = null, marks = 0, mx = q.marks, note = '', cr: any = null, v = ''
-    if (isEmpty(a)) { unans++; v = 'Unanswered' }
+    if (isEmpty(a) && q.type === 'code' && !rule.required) { mx = 0; v = 'Skipped (coding is optional for you)' }
+    else if (isEmpty(a)) { unans++; v = 'Unanswered' }
     else if (q.type === 'code') {
       const lang = a.language || q.meta?.lang, code = String(a.code ?? a), r = await gradeCode(lang, code, tmap[qid] || [])
       if (!r) { pending++; mx = 0; v = 'Pending review' }
@@ -156,7 +168,7 @@ Deno.serve(async (req) => {
     // ---------- exams the student can see, with attempts used and left
     if (b.action === 'list_exams') {
       const [{ data: exams }, { data: sess }, { data: atts }, { data: doms }, { data: stu }] = await Promise.all([
-        sb.from('exams').select('id,title,description,domain,domain_id,mode,total_min,per_sec,pass_pct,max_switches,max_attempts,start_at,end_at,question_ids,selection_mode,difficulty_mix,show_solutions,hosted_id,require_fullscreen,ai_proctoring').eq('live', true),
+        sb.from('exams').select('id,title,description,domain,domain_id,mode,total_min,per_sec,pass_pct,max_switches,max_attempts,start_at,end_at,question_ids,selection_mode,difficulty_mix,show_solutions,hosted_id,require_fullscreen,ai_proctoring,require_camera,require_seb,coding_policy,coding_min').eq('live', true),
         sb.from('exam_sessions').select('exam_id,status,attempt_no').eq('email', email),
         sb.from('attempts').select('id,exam_id,attempt_no,pct,passed,submitted_at').eq('student_email', email),
         sb.from('domains').select('id,name'),
@@ -196,6 +208,7 @@ Deno.serve(async (req) => {
       if (!ex) throw new Bad('Exam not found.', 404)
       const { data: stu } = await sb.from('students').select('email').eq('email', email).maybeSingle()
       if (!stu) throw new Bad('Save your details before starting an exam.')
+      if (ex.require_seb && !/\bSEB\b/i.test(req.headers.get('user-agent') || '')) throw new Bad('This exam must be opened in Safe Exam Browser. Open it from your exam configuration file and try again.', 403)
       { const { data: okEl } = await sb.rpc('is_eligible', { p_email: email, p_exam: ex.id }); if (!okEl) throw new Bad('You are not eligible for this exam.', 403) }
       const { data: act } = await sb.from('exam_sessions').select('*').eq('email', email).eq('exam_id', ex.id).eq('status', 'in_progress').maybeSingle()
       if (act && Date.now() > new Date(act.deadline_at).getTime()) { // time ran out while the student was away
@@ -220,12 +233,13 @@ Deno.serve(async (req) => {
       const questions = s.question_ids.map((id: string) => qm.get(id)).filter(Boolean).map((q: any) => ({
         id: q.id, section: q.section, type: q.type, category: q.category, difficulty: q.difficulty, title: q.title, text: q.text, marks: q.marks,
         options: dispOptions(q, s.option_orders?.[q.id]), statement: q.statement,
-        ...(q.type === 'code' ? { languages: allowedLangs(q), starter: q.meta?.starter, samples: (tmap[q.id] || []).filter((t: any) => !t.hidden).map((t: any) => ({ in: t.in, out: t.out })) } : {}) }))
+        ...(q.type === 'code' ? { languages: allowedLangs(q), starter: q.meta?.starter, starters: q.meta?.starters, samples: (tmap[q.id] || []).filter((t: any) => !t.hidden).map((t: any) => ({ in: t.in, out: t.out })) } : {}) }))
       const answers: Record<string, any> = {}
       for (const [qid, a] of Object.entries(s.answers || {})) answers[qid] = toDisp(qm.get(qid), s.option_orders?.[qid], a)
       return J({ session_id: s.id, attempt_no: s.attempt_no, attempts_left: Math.max(0, ex.max_attempts - s.attempt_no), resumed: !!act,
         remaining: secsTo(s.deadline_at), deadline_at: s.deadline_at, server_now: new Date().toISOString(),
-        exam: { id: ex.id, title: ex.title, mode: ex.mode, per_sec: ex.per_sec, total_min: ex.total_min, pass_pct: ex.pass_pct, max_switches: ex.max_switches, negative_marking: ex.negative_marking, require_fullscreen: ex.require_fullscreen !== false, ai_proctoring: !!ex.ai_proctoring, shuffle: ex.shuffle, hosted: !!ex.hosted_id },
+        exam: { id: ex.id, title: ex.title, mode: ex.mode, per_sec: ex.per_sec, total_min: ex.total_min, pass_pct: ex.pass_pct, max_switches: ex.max_switches, negative_marking: ex.negative_marking, require_fullscreen: ex.require_fullscreen !== false, ai_proctoring: !!ex.ai_proctoring, shuffle: ex.shuffle, hosted: !!ex.hosted_id, require_camera: !!ex.require_camera, require_seb: !!ex.require_seb },
+        coding: await (async () => { const r = await codingRule(ex, email); const n = (qrows || []).filter((q: any) => q.type === 'code').length; return { policy: r.policy, required: r.required, min: Math.min(r.min, n), total: n, engineering: r.engineering } })(),
         questions, answers, flags: s.flags, visited: s.visited })
     }
 
@@ -251,9 +265,38 @@ Deno.serve(async (req) => {
       const s = await getSession(b.session_id, email)
       if (s.status !== 'in_progress') throw new Bad('This attempt was already submitted.', 409)
       const timeUp = Date.now() >= new Date(s.deadline_at).getTime() - 1000
+      if (!b.auto && !timeUp) {   // a manual submit must satisfy the coding rule; automatic submits (time up, violations) never block
+        const sx = await getExam(s.exam_id), rule = await codingRule(sx, email)
+        if (rule.required && rule.min > 0) {
+          const qr = await qRows(sx, s.question_ids), codeIds = qr.filter((q: any) => q.type === 'code').map((q: any) => q.id)
+          const have: Record<string, any> = { ...s.answers }
+          if (b.current && s.question_ids.includes(b.current.question_id) && !isEmpty(b.current.answer)) have[b.current.question_id] = b.current.answer
+          const tried = codeIds.filter((id: string) => !isEmpty(have[id])).length
+          if (tried < Math.min(rule.min, codeIds.length)) throw new Bad(`Coding is mandatory for your branch. Attempt at least ${Math.min(rule.min, codeIds.length)} of the ${codeIds.length} coding questions before submitting (you have attempted ${tried}).`, 409)
+        }
+      }
       const result = await submitSession(s, b.auto || timeUp ? 'auto_submitted' : 'submitted', b.current)
       if (typeof b.violations === 'number' && b.violations > 0) await sb.from('attempts').update({ violations: Math.min(99, Math.floor(b.violations)) }).eq('session_id', s.id)
       return J(result)
+    }
+
+    // ---------- camera evidence and proctoring events (only for exams that require the camera)
+    if (b.action === 'proctor_snap' || b.action === 'proctor_event') {
+      const s = await getSession(b.session_id, email)
+      if (s.status !== 'in_progress') throw new Bad('This attempt is not active.', 409)
+      const sx = await getExam(s.exam_id)
+      if (b.action === 'proctor_event') {
+        const kind = String(b.kind || '').slice(0, 40); if (!kind) throw new Bad('Missing event kind.')
+        await sb.from('proctor_events').insert({ session_id: s.id, email, kind, detail: String(b.detail || '').slice(0, 300) })
+        return J({ ok: true })
+      }
+      if (!sx.require_camera) return J({ ok: true, ignored: true })
+      const img = String(b.image || '')
+      if (!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(img) || img.length > 90000) throw new Bad('Invalid image.')
+      const { count } = await sb.from('proctor_snaps').select('id', { count: 'exact', head: true }).eq('session_id', s.id)
+      if ((count || 0) >= 400) return J({ ok: true, capped: true })     // 400 snapshots per attempt is plenty (one every 30 s for over 3 hours)
+      await sb.from('proctor_snaps').insert({ session_id: s.id, exam_id: sx.id, email, image: img, face: typeof b.face === 'boolean' ? b.face : null, dark: !!b.dark })
+      return J({ ok: true })
     }
 
     // ---------- run code while the exam is going on (sample tests or custom input only)

@@ -30,11 +30,11 @@ DOMAINS = [  # slug, name, category
  ('expressjs','Express.js','web'),('angular','Angular','web'),('c','C','language'),('cpp','C++','language'),('java','Java','language'),
  ('python','Python','language'),('csharp','C#','language'),('mongodb','MongoDB','database'),('sql','SQL & Databases','database'),('dotnet','.NET','database')]
 ENTRANCE = [('ce-quant','Quantitative Aptitude'),('ce-reasoning','Logical Reasoning'),('ce-verbal','Verbal Ability'),('ce-analytical','Analytical Thinking')]
-ALL_SLUGS = [d[0] for d in DOMAINS] + [e[0] for e in ENTRANCE]
-NAME = {d[0]: d[1] for d in DOMAINS}; NAME.update(dict(ENTRANCE))
+ALL_SLUGS = [d[0] for d in DOMAINS] + [e[0] for e in ENTRANCE] + ['coding']
+NAME = {d[0]: d[1] for d in DOMAINS}; NAME.update(dict(ENTRANCE)); NAME['coding'] = 'Coding Challenges'
 FILES = {'html':'01_html','css':'02_css','javascript':'03_javascript','java':'04_java','python':'05_python','cpp':'06_cpp','c':'07_c','csharp':'08_csharp',
          'dotnet':'09_dotnet','mongodb':'10_mongodb','expressjs':'11_expressjs','nodejs':'12_nodejs','angular':'13_angular','react':'14_react','sql':'15_sql',
-         'ce-quant':'20_ce_quant','ce-reasoning':'21_ce_reasoning','ce-verbal':'22_ce_verbal','ce-analytical':'23_ce_analytical'}
+         'coding':'30_coding','ce-quant':'20_ce_quant','ce-reasoning':'21_ce_reasoning','ce-verbal':'22_ce_verbal','ce-analytical':'23_ce_analytical'}
 LEVELS = [('beginner','Beginner',30,1),('intermediate','Intermediate',40,2),('advanced','Advanced',50,3)]
 PKG_SIZE = 20
 q = lambda s: '$q$' + str(s) + '$q$'
@@ -95,6 +95,7 @@ def problems(slug, x):
         if not any(h_ for _, _, h_ in tests): p.append('no hidden test')
         if not any(not h_ for _, _, h_ in tests): p.append('no sample test')
         if not x.get('statement', {}).get('description'): p.append('no statement')
+        if any(l not in ('c','cpp','java','python','javascript','csharp','sql') for l in (x.get('languages') or [x['lang']])): p.append('unsupported language')
     else: p.append('unknown type')
     if x['type'] != 'code' and not (x.get('expl') or '').strip(): p.append('no explanation')
     if x['marks'] <= 0: p.append('marks <= 0')
@@ -132,8 +133,8 @@ def emit(slug):
         opts = q(json.dumps(x['options'])) + '::jsonb' if x['options'] else 'null'
         cor = 'null' if x['type'] == 'code' else q(json.dumps(x['correct'])) + '::jsonb'
         st = q(json.dumps(x['statement'])) + '::jsonb' if x['type'] == 'code' else "'{}'::jsonb"
-        lang = f"array['{x['lang']}']" if x['type'] == 'code' else "'{}'::text[]"
-        meta = q(json.dumps({'lang': x['lang'], 'starter': x['starter']})) + '::jsonb' if x['type'] == 'code' else "'{}'::jsonb"
+        lang = "array[" + ','.join(f"'{l}'" for l in (x.get('languages') or [x['lang']])) + "]" if x['type'] == 'code' else "'{}'::text[]"
+        meta = q(json.dumps({'lang': x['lang'], 'starter': x['starter'], **({'starters': x['starters']} if x.get('starters') else {})})) + '::jsonb' if x['type'] == 'code' else "'{}'::jsonb"
         title = q(x['text']) if x['type'] == 'code' else 'null'
         out.append(
             "insert into questions(domain_id,type,category,difficulty,text,title,options,correct,marks,explanation,statement,languages,meta,is_builtin,topic,source,content_status)\n"
@@ -183,6 +184,7 @@ def pick(slug, mix, avoid=True):
         for x in take: used[slug].add(x['hash'])
         out += take
     return out
+SECTION_NAME = {k: v for k, v in [('ce-quant','Quantitative Aptitude'),('ce-reasoning','Logical Reasoning'),('ce-verbal','Verbal Ability'),('ce-analytical','Analytical Thinking')]}
 SECTIONS = [('ce-quant','Quantitative Aptitude'),('ce-reasoning','Logical Reasoning'),('ce-verbal','Verbal Ability'),('ce-analytical','Analytical Thinking')]
 CE = [  # slug, title, per-section difficulty mixes
  ('common-entrance-standard','Common Entrance Examination – Standard',{'ce-quant':{'beginner':5,'intermediate':6,'advanced':4},'ce-reasoning':{'beginner':5,'intermediate':6,'advanced':4},'ce-verbal':{'beginner':4,'intermediate':4,'advanced':2},'ce-analytical':{'beginner':3,'intermediate':4,'advanced':3}},
@@ -203,15 +205,24 @@ for dsl, sname in SECTIONS:
         items=[(sname, dsl, x) for x in pick(dsl, SECTION_SETS[dsl], avoid=False)], pool=len(B[dsl])))
 
 def sect_targets(p):
-    c = Counter(sec for sec, _, _ in p['items'])
-    if p['type'] == 'entrance': return {k: v for k, v in zip([x[1] for x in SECTIONS], [{'ce-quant':15,'ce-reasoning':15,'ce-verbal':10,'ce-analytical':10}[x[0]] for x in SECTIONS])}
-    return {'Main': p['target']} if p['type'] == 'subject' else {p['items'][0][0]: p['target']} if p['items'] else {}
+    if p.get('sec_targets'): return p['sec_targets']
+    if p['type'] == 'entrance': return {x[1]: {'ce-quant':15,'ce-reasoning':15,'ce-verbal':10,'ce-analytical':10}[x[0]] for x in SECTIONS}
+    return {'Main': p['target']} if p['type'] == 'subject' else {SECTION_NAME[p['dom']]: p['target']}
+AC_MIX = {'ce-quant':{'beginner':4,'intermediate':7,'advanced':4},'ce-reasoning':{'beginner':4,'intermediate':7,'advanced':4},'ce-verbal':{'beginner':3,'intermediate':5,'advanced':2},'ce-analytical':{'beginner':3,'intermediate':4,'advanced':3}}
+ac_items = []
+for dsl, sname in SECTIONS: ac_items += [(sname, dsl, x) for x in pick(dsl, AC_MIX[dsl])]
+coding_pool = sorted(B['coding'], key=lambda z: ({'beginner':0,'intermediate':1,'advanced':2}[z['diff']], z['hash']))
+ac_items += [('Coding', 'coding', x) for x in coding_pool[:10]]
+PACKAGES.append(dict(slug='aptitude-coding-60', title='Aptitude & Coding Assessment (60 Questions)', dom=None, cat='entrance', diff='mixed', type='entrance', dur=120, pass_=40, target=60,
+    desc='60 questions for every candidate: Quantitative Aptitude 15, Logical Reasoning 15, Verbal Ability 10, Analytical Thinking 10 (1 mark each) and 10 coding problems (50 marks, Python, Java, C, C++ or JavaScript). Coding is optional for non-engineering candidates and mandatory for engineering branches when hosted with the default policy.',
+    items=ac_items, pool=None, coding_policy='required_engineering', coding_min=5,
+    sec_targets={'Quantitative Aptitude':15,'Logical Reasoning':15,'Verbal Ability':10,'Analytical Thinking':10,'Coding':10}))
 lib = ["-- Exam library packages. Run AFTER the seed files. Re-runnable. Ends by validating every package inside the database.\n"]
 for p in PACKAGES:
     dsel = f"(select id from domains where name={q(NAME[p['dom']])})" if p['dom'] else 'null'
-    lib.append("insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)\n"
-               f"values ('{p['slug']}',{q(p['title'])},{q(p['desc'])},{dsel},'{p['cat']}','{p['diff']}','{p['type']}',{p['dur']},{p['pass_']},{p['target']},{q(json.dumps(sect_targets(p)))}::jsonb)\n"
-               "on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;\n")
+    lib.append("insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)\n"
+               f"values ('{p['slug']}',{q(p['title'])},{q(p['desc'])},{dsel},'{p['cat']}','{p['diff']}','{p['type']}',{p['dur']},{p['pass_']},{p['target']},{q(json.dumps(sect_targets(p)))}::jsonb,'{p.get('coding_policy','required_all')}',{p.get('coding_min',0)})\n"
+               "on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;\n")
     lib.append(f"delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='{p['slug']}');\n")
     if p['items']:
         vals = ',\n  '.join(f"({q(sec)},{i},{q(NAME[dsl])},'{x['hash']}')" for i, (sec, dsl, x) in enumerate(p['items'], 1))
@@ -253,11 +264,11 @@ R = ['# IGEEKS EMS – Content Quality Report', f'Generated {datetime.datetime.n
      f'- Exact duplicates inside a domain: **{len(dups)}**; near-duplicates (>=88% similar text): **{len(near)}**; exact duplicates across domains: **{len(cross)}**',
      f'- New questions skipped because the same stem already existed: **{len(SKIPPED)}**',
      f'- Exam packages: **{len(ready)} READY**, **{len(blocked)} BLOCKED** of {len(verdicts)}',
-     f'- Content still needed: **{sum(max(0,30-cov[x][l]) for x in ALL_SLUGS if not x.startswith("ce-") for l in ("beginner","intermediate","advanced"))}** questions for 30/30/30 in every subject domain; **{sum(max(0,PKG_SIZE-cov[x][l]) for x in ALL_SLUGS if not x.startswith("ce-") for l in ("beginner","intermediate","advanced"))}** to make every {PKG_SIZE}-question subject package READY. BLOCKED packages cannot be hosted.',
+     f'- Content still needed: **{sum(max(0,30-cov[x][l]) for x in ALL_SLUGS if not x.startswith("ce-") and x != "coding" for l in ("beginner","intermediate","advanced"))}** questions for 30/30/30 in every subject domain; **{sum(max(0,PKG_SIZE-cov[x][l]) for x in ALL_SLUGS if not x.startswith("ce-") and x != "coding" for l in ("beginner","intermediate","advanced"))}** to make every {PKG_SIZE}-question subject package READY. BLOCKED packages cannot be hosted.',
      f'- MCQ answer-position spread (A,B,C,D): {[pos[i] for i in range(4)]}; correct option is the longest in {longest/mcqn:.0%} of {mcqn} MCQs', '',
      '## Question counts per domain and difficulty (target: 30 each)', '| Domain | Beginner | Intermediate | Advanced | Total | Meets 30/30/30 |', '|---|---:|---:|---:|---:|:--:|']
-names = {d[0]: d[1] for d in DOMAINS}; names.update(dict(ENTRANCE))
-for s in ALL_SLUGS:
+names = dict(NAME)
+for s in [z for z in ALL_SLUGS if z != 'coding']:
     cc = cov[s]; ok = all(cc[l[0]] >= 30 for l in LEVELS)
     R.append(f"| {names[s]} | {cc['beginner']} | {cc['intermediate']} | {cc['advanced']} | {sum(cc.values())} | {'yes' if ok else ('pool>=50' if s.startswith('ce-') and sum(cc.values())>=50 else 'NO')} |")
 R += ['', '## Exam packages', '| Package | Questions | Marks | Status | Reason |', '|---|---:|---:|---|---|']

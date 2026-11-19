@@ -1,7 +1,7 @@
 -- Exam library packages. Run AFTER the seed files. Re-runnable. Ends by validating every package inside the database.
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('html-beginner',$q$HTML Beginner$q$,$q$20 beginner-level questions on HTML: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$HTML$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('html-beginner',$q$HTML Beginner$q$,$q$20 beginner-level questions on HTML: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$HTML$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='html-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -29,9 +29,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='html-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('html-intermediate',$q$HTML Intermediate$q$,$q$20 intermediate-level questions on HTML: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$HTML$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('html-intermediate',$q$HTML Intermediate$q$,$q$20 intermediate-level questions on HTML: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$HTML$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='html-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -59,9 +59,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='html-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('html-advanced',$q$HTML Advanced$q$,$q$20 advanced-level questions on HTML: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$HTML$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('html-advanced',$q$HTML Advanced$q$,$q$20 advanced-level questions on HTML: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$HTML$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='html-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -89,9 +89,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='html-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('css-beginner',$q$CSS Beginner$q$,$q$20 beginner-level questions on CSS: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$CSS$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('css-beginner',$q$CSS Beginner$q$,$q$20 beginner-level questions on CSS: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$CSS$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='css-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -119,9 +119,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='css-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('css-intermediate',$q$CSS Intermediate$q$,$q$20 intermediate-level questions on CSS: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$CSS$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('css-intermediate',$q$CSS Intermediate$q$,$q$20 intermediate-level questions on CSS: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$CSS$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='css-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -149,9 +149,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='css-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('css-advanced',$q$CSS Advanced$q$,$q$20 advanced-level questions on CSS: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$CSS$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('css-advanced',$q$CSS Advanced$q$,$q$20 advanced-level questions on CSS: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$CSS$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='css-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -179,9 +179,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='css-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('javascript-beginner',$q$JavaScript Beginner$q$,$q$20 beginner-level questions on JavaScript: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$JavaScript$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('javascript-beginner',$q$JavaScript Beginner$q$,$q$20 beginner-level questions on JavaScript: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$JavaScript$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='javascript-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -209,9 +209,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='javascript-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('javascript-intermediate',$q$JavaScript Intermediate$q$,$q$20 intermediate-level questions on JavaScript: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$JavaScript$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('javascript-intermediate',$q$JavaScript Intermediate$q$,$q$20 intermediate-level questions on JavaScript: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$JavaScript$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='javascript-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -239,9 +239,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='javascript-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('javascript-advanced',$q$JavaScript Advanced$q$,$q$20 advanced-level questions on JavaScript: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$JavaScript$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('javascript-advanced',$q$JavaScript Advanced$q$,$q$20 advanced-level questions on JavaScript: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$JavaScript$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='javascript-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -269,9 +269,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='javascript-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('react-beginner',$q$React Beginner$q$,$q$20 beginner-level questions on React: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$React$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('react-beginner',$q$React Beginner$q$,$q$20 beginner-level questions on React: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$React$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='react-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -299,9 +299,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='react-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('react-intermediate',$q$React Intermediate$q$,$q$20 intermediate-level questions on React: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$React$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('react-intermediate',$q$React Intermediate$q$,$q$20 intermediate-level questions on React: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$React$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='react-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -329,9 +329,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='react-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('react-advanced',$q$React Advanced$q$,$q$20 advanced-level questions on React: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$React$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('react-advanced',$q$React Advanced$q$,$q$20 advanced-level questions on React: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$React$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='react-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -359,9 +359,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='react-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('nodejs-beginner',$q$Node.js Beginner$q$,$q$20 beginner-level questions on Node.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Node.js$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('nodejs-beginner',$q$Node.js Beginner$q$,$q$20 beginner-level questions on Node.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Node.js$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='nodejs-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -389,9 +389,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='nodejs-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('nodejs-intermediate',$q$Node.js Intermediate$q$,$q$20 intermediate-level questions on Node.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Node.js$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('nodejs-intermediate',$q$Node.js Intermediate$q$,$q$20 intermediate-level questions on Node.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Node.js$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='nodejs-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -419,9 +419,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='nodejs-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('nodejs-advanced',$q$Node.js Advanced$q$,$q$20 advanced-level questions on Node.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Node.js$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('nodejs-advanced',$q$Node.js Advanced$q$,$q$20 advanced-level questions on Node.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Node.js$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='nodejs-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -449,9 +449,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='nodejs-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('expressjs-beginner',$q$Express.js Beginner$q$,$q$20 beginner-level questions on Express.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Express.js$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('expressjs-beginner',$q$Express.js Beginner$q$,$q$20 beginner-level questions on Express.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Express.js$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='expressjs-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -479,9 +479,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='expressjs-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('expressjs-intermediate',$q$Express.js Intermediate$q$,$q$20 intermediate-level questions on Express.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Express.js$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('expressjs-intermediate',$q$Express.js Intermediate$q$,$q$20 intermediate-level questions on Express.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Express.js$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='expressjs-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -509,9 +509,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='expressjs-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('expressjs-advanced',$q$Express.js Advanced$q$,$q$20 advanced-level questions on Express.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Express.js$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('expressjs-advanced',$q$Express.js Advanced$q$,$q$20 advanced-level questions on Express.js: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Express.js$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='expressjs-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -539,9 +539,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='expressjs-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('angular-beginner',$q$Angular Beginner$q$,$q$20 beginner-level questions on Angular: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Angular$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('angular-beginner',$q$Angular Beginner$q$,$q$20 beginner-level questions on Angular: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Angular$q$),'web','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='angular-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -569,9 +569,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='angular-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('angular-intermediate',$q$Angular Intermediate$q$,$q$20 intermediate-level questions on Angular: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Angular$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('angular-intermediate',$q$Angular Intermediate$q$,$q$20 intermediate-level questions on Angular: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Angular$q$),'web','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='angular-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -599,9 +599,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='angular-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('angular-advanced',$q$Angular Advanced$q$,$q$20 advanced-level questions on Angular: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Angular$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('angular-advanced',$q$Angular Advanced$q$,$q$20 advanced-level questions on Angular: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Angular$q$),'web','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='angular-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -629,9 +629,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='angular-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('c-beginner',$q$C Beginner$q$,$q$20 beginner-level questions on C: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C$q$),'language','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('c-beginner',$q$C Beginner$q$,$q$20 beginner-level questions on C: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C$q$),'language','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='c-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -659,9 +659,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='c-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('c-intermediate',$q$C Intermediate$q$,$q$20 intermediate-level questions on C: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C$q$),'language','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('c-intermediate',$q$C Intermediate$q$,$q$20 intermediate-level questions on C: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C$q$),'language','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='c-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -689,9 +689,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='c-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('c-advanced',$q$C Advanced$q$,$q$20 advanced-level questions on C: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C$q$),'language','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('c-advanced',$q$C Advanced$q$,$q$20 advanced-level questions on C: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C$q$),'language','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='c-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -719,9 +719,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='c-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('cpp-beginner',$q$C++ Beginner$q$,$q$20 beginner-level questions on C++: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C++$q$),'language','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('cpp-beginner',$q$C++ Beginner$q$,$q$20 beginner-level questions on C++: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C++$q$),'language','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='cpp-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -749,9 +749,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='cpp-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('cpp-intermediate',$q$C++ Intermediate$q$,$q$20 intermediate-level questions on C++: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C++$q$),'language','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('cpp-intermediate',$q$C++ Intermediate$q$,$q$20 intermediate-level questions on C++: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C++$q$),'language','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='cpp-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -779,9 +779,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='cpp-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('cpp-advanced',$q$C++ Advanced$q$,$q$20 advanced-level questions on C++: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C++$q$),'language','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('cpp-advanced',$q$C++ Advanced$q$,$q$20 advanced-level questions on C++: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C++$q$),'language','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='cpp-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -809,9 +809,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='cpp-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('java-beginner',$q$Java Beginner$q$,$q$20 beginner-level questions on Java: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Java$q$),'language','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('java-beginner',$q$Java Beginner$q$,$q$20 beginner-level questions on Java: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Java$q$),'language','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='java-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -839,9 +839,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='java-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('java-intermediate',$q$Java Intermediate$q$,$q$20 intermediate-level questions on Java: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Java$q$),'language','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('java-intermediate',$q$Java Intermediate$q$,$q$20 intermediate-level questions on Java: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Java$q$),'language','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='java-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -869,9 +869,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='java-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('java-advanced',$q$Java Advanced$q$,$q$20 advanced-level questions on Java: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Java$q$),'language','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('java-advanced',$q$Java Advanced$q$,$q$20 advanced-level questions on Java: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Java$q$),'language','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='java-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -899,9 +899,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='java-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('python-beginner',$q$Python Beginner$q$,$q$20 beginner-level questions on Python: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Python$q$),'language','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('python-beginner',$q$Python Beginner$q$,$q$20 beginner-level questions on Python: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Python$q$),'language','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='python-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -929,9 +929,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='python-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('python-intermediate',$q$Python Intermediate$q$,$q$20 intermediate-level questions on Python: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Python$q$),'language','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('python-intermediate',$q$Python Intermediate$q$,$q$20 intermediate-level questions on Python: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Python$q$),'language','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='python-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -959,9 +959,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='python-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('python-advanced',$q$Python Advanced$q$,$q$20 advanced-level questions on Python: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Python$q$),'language','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('python-advanced',$q$Python Advanced$q$,$q$20 advanced-level questions on Python: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$Python$q$),'language','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='python-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -989,9 +989,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='python-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('csharp-beginner',$q$C# Beginner$q$,$q$20 beginner-level questions on C#: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C#$q$),'language','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('csharp-beginner',$q$C# Beginner$q$,$q$20 beginner-level questions on C#: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C#$q$),'language','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='csharp-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1019,9 +1019,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='csharp-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('csharp-intermediate',$q$C# Intermediate$q$,$q$20 intermediate-level questions on C#: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C#$q$),'language','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('csharp-intermediate',$q$C# Intermediate$q$,$q$20 intermediate-level questions on C#: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C#$q$),'language','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='csharp-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1049,9 +1049,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='csharp-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('csharp-advanced',$q$C# Advanced$q$,$q$20 advanced-level questions on C#: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C#$q$),'language','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('csharp-advanced',$q$C# Advanced$q$,$q$20 advanced-level questions on C#: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$C#$q$),'language','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='csharp-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1079,9 +1079,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='csharp-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('mongodb-beginner',$q$MongoDB Beginner$q$,$q$20 beginner-level questions on MongoDB: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$MongoDB$q$),'database','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('mongodb-beginner',$q$MongoDB Beginner$q$,$q$20 beginner-level questions on MongoDB: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$MongoDB$q$),'database','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='mongodb-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1109,9 +1109,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='mongodb-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('mongodb-intermediate',$q$MongoDB Intermediate$q$,$q$20 intermediate-level questions on MongoDB: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$MongoDB$q$),'database','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('mongodb-intermediate',$q$MongoDB Intermediate$q$,$q$20 intermediate-level questions on MongoDB: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$MongoDB$q$),'database','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='mongodb-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1139,9 +1139,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='mongodb-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('mongodb-advanced',$q$MongoDB Advanced$q$,$q$20 advanced-level questions on MongoDB: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$MongoDB$q$),'database','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('mongodb-advanced',$q$MongoDB Advanced$q$,$q$20 advanced-level questions on MongoDB: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$MongoDB$q$),'database','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='mongodb-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1169,9 +1169,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='mongodb-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('sql-beginner',$q$SQL & Databases Beginner$q$,$q$20 beginner-level questions on SQL & Databases: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$SQL & Databases$q$),'database','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('sql-beginner',$q$SQL & Databases Beginner$q$,$q$20 beginner-level questions on SQL & Databases: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$SQL & Databases$q$),'database','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='sql-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1199,9 +1199,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='sql-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('sql-intermediate',$q$SQL & Databases Intermediate$q$,$q$20 intermediate-level questions on SQL & Databases: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$SQL & Databases$q$),'database','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('sql-intermediate',$q$SQL & Databases Intermediate$q$,$q$20 intermediate-level questions on SQL & Databases: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$SQL & Databases$q$),'database','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='sql-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1229,9 +1229,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='sql-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('sql-advanced',$q$SQL & Databases Advanced$q$,$q$20 advanced-level questions on SQL & Databases: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$SQL & Databases$q$),'database','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('sql-advanced',$q$SQL & Databases Advanced$q$,$q$20 advanced-level questions on SQL & Databases: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$SQL & Databases$q$),'database','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='sql-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1259,9 +1259,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='sql-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('dotnet-beginner',$q$.NET Beginner$q$,$q$20 beginner-level questions on .NET: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$.NET$q$),'database','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('dotnet-beginner',$q$.NET Beginner$q$,$q$20 beginner-level questions on .NET: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$.NET$q$),'database','beginner','subject',30,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='dotnet-beginner');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1289,9 +1289,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='dotnet-beginner';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('dotnet-intermediate',$q$.NET Intermediate$q$,$q$20 intermediate-level questions on .NET: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$.NET$q$),'database','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('dotnet-intermediate',$q$.NET Intermediate$q$,$q$20 intermediate-level questions on .NET: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$.NET$q$),'database','intermediate','subject',40,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='dotnet-intermediate');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1319,9 +1319,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='dotnet-intermediate';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('dotnet-advanced',$q$.NET Advanced$q$,$q$20 advanced-level questions on .NET: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$.NET$q$),'database','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('dotnet-advanced',$q$.NET Advanced$q$,$q$20 advanced-level questions on .NET: topic-balanced, with answers and explanations. Ready to host.$q$,(select id from domains where name=$q$.NET$q$),'database','advanced','subject',50,50,20,$q${"Main": 20}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='dotnet-advanced');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1349,9 +1349,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='dotnet-advanced';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('common-entrance-standard',$q$Common Entrance Examination – Standard$q$,$q$Complete 50-question entrance test for every engineering branch: Quantitative Aptitude 15, Logical Reasoning 15, Verbal Ability 10, Analytical Thinking 10. Balanced difficulty, 1 mark each.$q$,null,'entrance','mixed','entrance',60,40,50,$q${"Quantitative Aptitude": 15, "Logical Reasoning": 15, "Verbal Ability": 10, "Analytical Thinking": 10}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('common-entrance-standard',$q$Common Entrance Examination – Standard$q$,$q$Complete 50-question entrance test for every engineering branch: Quantitative Aptitude 15, Logical Reasoning 15, Verbal Ability 10, Analytical Thinking 10. Balanced difficulty, 1 mark each.$q$,null,'entrance','mixed','entrance',60,40,50,$q${"Quantitative Aptitude": 15, "Logical Reasoning": 15, "Verbal Ability": 10, "Analytical Thinking": 10}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='common-entrance-standard');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1409,9 +1409,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='common-entrance-standard';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('common-entrance-foundation',$q$Common Entrance Examination – Foundation$q$,$q$Easier 50-question version of the entrance test, suited to first-year or screening use. Same four sections and marks.$q$,null,'entrance','mixed','entrance',60,40,50,$q${"Quantitative Aptitude": 15, "Logical Reasoning": 15, "Verbal Ability": 10, "Analytical Thinking": 10}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('common-entrance-foundation',$q$Common Entrance Examination – Foundation$q$,$q$Easier 50-question version of the entrance test, suited to first-year or screening use. Same four sections and marks.$q$,null,'entrance','mixed','entrance',60,40,50,$q${"Quantitative Aptitude": 15, "Logical Reasoning": 15, "Verbal Ability": 10, "Analytical Thinking": 10}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='common-entrance-foundation');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1469,9 +1469,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='common-entrance-foundation';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('common-entrance-challenge',$q$Common Entrance Examination – Challenge$q$,$q$Harder 50-question version of the entrance test for scholarship or final-round selection. Same four sections and marks.$q$,null,'entrance','mixed','entrance',60,40,50,$q${"Quantitative Aptitude": 15, "Logical Reasoning": 15, "Verbal Ability": 10, "Analytical Thinking": 10}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('common-entrance-challenge',$q$Common Entrance Examination – Challenge$q$,$q$Harder 50-question version of the entrance test for scholarship or final-round selection. Same four sections and marks.$q$,null,'entrance','mixed','entrance',60,40,50,$q${"Quantitative Aptitude": 15, "Logical Reasoning": 15, "Verbal Ability": 10, "Analytical Thinking": 10}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='common-entrance-challenge');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1529,9 +1529,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='common-entrance-challenge';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('ce-quant-practice',$q$Common Entrance – Quantitative Aptitude Section Test$q$,$q$25-question section test on Quantitative Aptitude drawn from the full pool, mixed difficulty, 1 mark each.$q$,(select id from domains where name=$q$Quantitative Aptitude$q$),'entrance','mixed','section',30,40,25,$q${"Quantitative Aptitude": 25}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('ce-quant-practice',$q$Common Entrance – Quantitative Aptitude Section Test$q$,$q$25-question section test on Quantitative Aptitude drawn from the full pool, mixed difficulty, 1 mark each.$q$,(select id from domains where name=$q$Quantitative Aptitude$q$),'entrance','mixed','section',30,40,25,$q${"Quantitative Aptitude": 25}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='ce-quant-practice');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1564,9 +1564,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='ce-quant-practice';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('ce-reasoning-practice',$q$Common Entrance – Logical Reasoning Section Test$q$,$q$25-question section test on Logical Reasoning drawn from the full pool, mixed difficulty, 1 mark each.$q$,(select id from domains where name=$q$Logical Reasoning$q$),'entrance','mixed','section',30,40,25,$q${"Logical Reasoning": 25}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('ce-reasoning-practice',$q$Common Entrance – Logical Reasoning Section Test$q$,$q$25-question section test on Logical Reasoning drawn from the full pool, mixed difficulty, 1 mark each.$q$,(select id from domains where name=$q$Logical Reasoning$q$),'entrance','mixed','section',30,40,25,$q${"Logical Reasoning": 25}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='ce-reasoning-practice');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1599,9 +1599,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='ce-reasoning-practice';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('ce-verbal-practice',$q$Common Entrance – Verbal Ability Section Test$q$,$q$25-question section test on Verbal Ability drawn from the full pool, mixed difficulty, 1 mark each.$q$,(select id from domains where name=$q$Verbal Ability$q$),'entrance','mixed','section',30,40,25,$q${"Verbal Ability": 25}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('ce-verbal-practice',$q$Common Entrance – Verbal Ability Section Test$q$,$q$25-question section test on Verbal Ability drawn from the full pool, mixed difficulty, 1 mark each.$q$,(select id from domains where name=$q$Verbal Ability$q$),'entrance','mixed','section',30,40,25,$q${"Verbal Ability": 25}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='ce-verbal-practice');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1634,9 +1634,9 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='ce-verbal-practice';
-insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets)
-values ('ce-analytical-practice',$q$Common Entrance – Analytical Thinking Section Test$q$,$q$25-question section test on Analytical Thinking drawn from the full pool, mixed difficulty, 1 mark each.$q$,(select id from domains where name=$q$Analytical Thinking$q$),'entrance','mixed','section',30,40,25,$q${"Analytical Thinking": 25}$q$::jsonb)
-on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions;
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('ce-analytical-practice',$q$Common Entrance – Analytical Thinking Section Test$q$,$q$25-question section test on Analytical Thinking drawn from the full pool, mixed difficulty, 1 mark each.$q$,(select id from domains where name=$q$Analytical Thinking$q$),'entrance','mixed','section',30,40,25,$q${"Analytical Thinking": 25}$q$::jsonb,'required_all',0)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
 delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='ce-analytical-practice');
 insert into library_exam_questions(library_exam_id,question_id,section,position)
 select le.id,qq.id,v.sec,v.pos from library_exams le
@@ -1669,5 +1669,75 @@ cross join (values
 ) as v(sec,pos,dom,h)
 join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
 where le.slug='ce-analytical-practice';
+insert into library_exams(slug,title,description,domain_id,category,difficulty,exam_type,duration_min,pass_pct,target_questions,section_targets,coding_policy,coding_min)
+values ('aptitude-coding-60',$q$Aptitude & Coding Assessment (60 Questions)$q$,$q$60 questions for every candidate: Quantitative Aptitude 15, Logical Reasoning 15, Verbal Ability 10, Analytical Thinking 10 (1 mark each) and 10 coding problems (50 marks, Python, Java, C, C++ or JavaScript). Coding is optional for non-engineering candidates and mandatory for engineering branches when hosted with the default policy.$q$,null,'entrance','mixed','entrance',120,40,60,$q${"Quantitative Aptitude": 15, "Logical Reasoning": 15, "Verbal Ability": 10, "Analytical Thinking": 10, "Coding": 10}$q$::jsonb,'required_engineering',5)
+on conflict (slug) do update set description=excluded.description, section_targets=excluded.section_targets, target_questions=excluded.target_questions, coding_policy=excluded.coding_policy, coding_min=excluded.coding_min;
+delete from library_exam_questions where library_exam_id=(select id from library_exams where slug='aptitude-coding-60');
+insert into library_exam_questions(library_exam_id,question_id,section,position)
+select le.id,qq.id,v.sec,v.pos from library_exams le
+cross join (values
+  ($q$Quantitative Aptitude$q$,1,$q$Quantitative Aptitude$q$,'735d7acee7ce001bb31fd3021abb8ed2'),
+  ($q$Quantitative Aptitude$q$,2,$q$Quantitative Aptitude$q$,'78b2d6ce36c8e0dd5ac8b837083369dd'),
+  ($q$Quantitative Aptitude$q$,3,$q$Quantitative Aptitude$q$,'57ce28836e462fefeb7a9df2fb5ea8fc'),
+  ($q$Quantitative Aptitude$q$,4,$q$Quantitative Aptitude$q$,'e388dac77d49cd146a8ca2b4c8cb7a9c'),
+  ($q$Quantitative Aptitude$q$,5,$q$Quantitative Aptitude$q$,'7f7efa5105bbd0a4ffa15e9fa57ac5a5'),
+  ($q$Quantitative Aptitude$q$,6,$q$Quantitative Aptitude$q$,'a375df699322f31128217167793901c1'),
+  ($q$Quantitative Aptitude$q$,7,$q$Quantitative Aptitude$q$,'5bcc1681c3a911b96f45da93e4b9504d'),
+  ($q$Quantitative Aptitude$q$,8,$q$Quantitative Aptitude$q$,'a8fe5e2267b21bba3e5a69244891def5'),
+  ($q$Quantitative Aptitude$q$,9,$q$Quantitative Aptitude$q$,'467134f0e147b75aeb9b72ebd17c7e0d'),
+  ($q$Quantitative Aptitude$q$,10,$q$Quantitative Aptitude$q$,'c82a73b3ce524a7ab9e7d6c3d82f4004'),
+  ($q$Quantitative Aptitude$q$,11,$q$Quantitative Aptitude$q$,'69801222e3baf27d6c0bd4c41d8f37bb'),
+  ($q$Quantitative Aptitude$q$,12,$q$Quantitative Aptitude$q$,'448f0ae222b5cef75ae3dc36640003b2'),
+  ($q$Quantitative Aptitude$q$,13,$q$Quantitative Aptitude$q$,'add8bf372f865a515e42fd0369273b84'),
+  ($q$Quantitative Aptitude$q$,14,$q$Quantitative Aptitude$q$,'c63b932aef27f5adb69af6b750badfe7'),
+  ($q$Quantitative Aptitude$q$,15,$q$Quantitative Aptitude$q$,'c2fc077638c2be1d0dc4b2898954f07c'),
+  ($q$Logical Reasoning$q$,16,$q$Logical Reasoning$q$,'ef1d06acde675bd88966e614920fd0d8'),
+  ($q$Logical Reasoning$q$,17,$q$Logical Reasoning$q$,'fa3de88caa80fd824a38d6892fccceee'),
+  ($q$Logical Reasoning$q$,18,$q$Logical Reasoning$q$,'3656daa85313f258c2752fb4857ba071'),
+  ($q$Logical Reasoning$q$,19,$q$Logical Reasoning$q$,'6326e5ebf9b352a0f0b81f07d5652d68'),
+  ($q$Logical Reasoning$q$,20,$q$Logical Reasoning$q$,'758ea1d49b9db91ecb63c49836fb785a'),
+  ($q$Logical Reasoning$q$,21,$q$Logical Reasoning$q$,'50bb05a69a260a9a83196a7f28aeb55c'),
+  ($q$Logical Reasoning$q$,22,$q$Logical Reasoning$q$,'acd5221afb5e7ebe2aee1b39c4884469'),
+  ($q$Logical Reasoning$q$,23,$q$Logical Reasoning$q$,'31ae028a99e18be460fc5292920aa1e7'),
+  ($q$Logical Reasoning$q$,24,$q$Logical Reasoning$q$,'b9aed111ddfbcb8fd68b6dfbbcc03123'),
+  ($q$Logical Reasoning$q$,25,$q$Logical Reasoning$q$,'6ceed3d05f034b228663321b67d41254'),
+  ($q$Logical Reasoning$q$,26,$q$Logical Reasoning$q$,'79d88acf072648f1f21c29194f6eb598'),
+  ($q$Logical Reasoning$q$,27,$q$Logical Reasoning$q$,'cc574603adafdf9df3bafa546b82dcf4'),
+  ($q$Logical Reasoning$q$,28,$q$Logical Reasoning$q$,'f149c88465dabe8cdc781c5bc3e1aa0d'),
+  ($q$Logical Reasoning$q$,29,$q$Logical Reasoning$q$,'200a3316acd7f39d92a25e6e952c8693'),
+  ($q$Logical Reasoning$q$,30,$q$Logical Reasoning$q$,'1d0c184b93cecad750622c9cdc1924e1'),
+  ($q$Verbal Ability$q$,31,$q$Verbal Ability$q$,'8bbe0f8cd91fc6a960a579f51a90a7e1'),
+  ($q$Verbal Ability$q$,32,$q$Verbal Ability$q$,'4f6539b4829b59f9fe21bb3578102be7'),
+  ($q$Verbal Ability$q$,33,$q$Verbal Ability$q$,'850a9fc4236e494e2d7319f031aa1a17'),
+  ($q$Verbal Ability$q$,34,$q$Verbal Ability$q$,'301c5d0c4a00bc81304128b0b584b864'),
+  ($q$Verbal Ability$q$,35,$q$Verbal Ability$q$,'660b85a36b4d368bdab6e8a6df1d5cbc'),
+  ($q$Verbal Ability$q$,36,$q$Verbal Ability$q$,'278c95ad954ab4da80552b1167bf4b91'),
+  ($q$Verbal Ability$q$,37,$q$Verbal Ability$q$,'bbeefa25c0310bf4942aba21008c2621'),
+  ($q$Verbal Ability$q$,38,$q$Verbal Ability$q$,'46b7a1861fa2cb60bb1f2133f133f660'),
+  ($q$Verbal Ability$q$,39,$q$Verbal Ability$q$,'ff1a39b0d8baa0a3d18db17e882708cd'),
+  ($q$Verbal Ability$q$,40,$q$Verbal Ability$q$,'363d439a2f8a54721274d32de542ce29'),
+  ($q$Analytical Thinking$q$,41,$q$Analytical Thinking$q$,'cb65fb8afb7480b124735917b9185fcf'),
+  ($q$Analytical Thinking$q$,42,$q$Analytical Thinking$q$,'cde45c7d48368f3ec60011aa01c5ecca'),
+  ($q$Analytical Thinking$q$,43,$q$Analytical Thinking$q$,'e1b6f8659305a4696def0710b1b28f19'),
+  ($q$Analytical Thinking$q$,44,$q$Analytical Thinking$q$,'1f46d7032e0de963d79a97bd845a4756'),
+  ($q$Analytical Thinking$q$,45,$q$Analytical Thinking$q$,'d4a3d972e70b420992e5f6cb5559a431'),
+  ($q$Analytical Thinking$q$,46,$q$Analytical Thinking$q$,'ac161b83c31b28e8fe0b5f400f82bf1b'),
+  ($q$Analytical Thinking$q$,47,$q$Analytical Thinking$q$,'f4f580ff2dfb7e0cd5ba68e7a8d89ef0'),
+  ($q$Analytical Thinking$q$,48,$q$Analytical Thinking$q$,'af6e7387b46d1b1ed1f78a7a6c11dbe5'),
+  ($q$Analytical Thinking$q$,49,$q$Analytical Thinking$q$,'ad91886bd393dca04f075c62360719c6'),
+  ($q$Analytical Thinking$q$,50,$q$Analytical Thinking$q$,'7f85b32b254c9fd69796146a5857f579'),
+  ($q$Coding$q$,51,$q$Coding Challenges$q$,'517a327d22828379a47ac48b7ba9bb33'),
+  ($q$Coding$q$,52,$q$Coding Challenges$q$,'9a60d237edf41f8fd3d3ee45eebb01c4'),
+  ($q$Coding$q$,53,$q$Coding Challenges$q$,'aecfe8d5734b8455da65cb32983355c0'),
+  ($q$Coding$q$,54,$q$Coding Challenges$q$,'e21b206567bd9cef5055e7d8cb72c29e'),
+  ($q$Coding$q$,55,$q$Coding Challenges$q$,'6010063c1dbae70ca9034a37e5c9902c'),
+  ($q$Coding$q$,56,$q$Coding Challenges$q$,'6b3d0a48e0c524ed135f45ac217fb15b'),
+  ($q$Coding$q$,57,$q$Coding Challenges$q$,'d0e4d7b97a4a651aff7febc565afba2b'),
+  ($q$Coding$q$,58,$q$Coding Challenges$q$,'ec6b8d4bb723797566ca647969d15f9c'),
+  ($q$Coding$q$,59,$q$Coding Challenges$q$,'6f8782704d97badb69d9d8405b749892'),
+  ($q$Coding$q$,60,$q$Coding Challenges$q$,'fed0901e97627395a9d48683cbdc22a5')
+) as v(sec,pos,dom,h)
+join domains d on d.name=v.dom join questions qq on qq.domain_id=d.id and md5(lower(qq.text))=v.h
+where le.slug='aptitude-coding-60';
 
 select * from validate_all_library_exams();

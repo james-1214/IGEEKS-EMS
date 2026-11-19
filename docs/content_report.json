@@ -1,5 +1,5 @@
 {
- "total": 1211,
+ "total": 1221,
  "failures": [],
  "duplicates": [],
  "near": [
@@ -724,6 +724,18 @@
    "pool": 61,
    "status": "READY",
    "issues": []
+  },
+  {
+   "slug": "aptitude-coding-60",
+   "title": "Aptitude & Coding Assessment (60 Questions)",
+   "category": "entrance",
+   "difficulty": "mixed",
+   "questions": 60,
+   "target": 60,
+   "marks": 100,
+   "pool": null,
+   "status": "READY",
+   "issues": []
   }
  ],
  "coverage": {
@@ -821,6 +833,11 @@
    "beginner": 12,
    "intermediate": 25,
    "advanced": 24
+  },
+  "coding": {
+   "beginner": 4,
+   "intermediate": 4,
+   "advanced": 2
   }
  }
 }
