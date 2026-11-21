@@ -1,13 +1,18 @@
-import {useState,useEffect} from 'react'
+import {lazy,Suspense,useState,useEffect} from 'react'
 import {sb} from '../lib'
 import {Chip,Kpi,Loading} from './ui'
 import {MIN_PER_DOMAIN,TYPES,fmtTime} from './utils'
-import QuestionBank from './QuestionBank'
-import {ExamForm,ExamList} from './Exams'
-import Analytics from './Analytics'
-import People from './People'
-import {Results,Review} from './Legacy'
-import {Library,HostWizard,Hosted} from './Library'
+
+const QuestionBank = lazy(() => import('./QuestionBank'))
+const ExamForm = lazy(() => import('./Exams').then(m => ({ default: m.ExamForm })))
+const ExamList = lazy(() => import('./Exams').then(m => ({ default: m.ExamList })))
+const Analytics = lazy(() => import('./Analytics'))
+const People = lazy(() => import('./People'))
+const Results = lazy(() => import('./Legacy').then(m => ({ default: m.Results })))
+const Review = lazy(() => import('./Legacy').then(m => ({ default: m.Review })))
+const Library = lazy(() => import('./Library').then(m => ({ default: m.Library })))
+const HostWizard = lazy(() => import('./Library').then(m => ({ default: m.HostWizard })))
+const Hosted = lazy(() => import('./Library').then(m => ({ default: m.Hosted })))
 
 const NAV = [['dash', 'Dashboard'], ['students', 'Students'], ['domains', 'Domains'], ['library', 'Exam Library'], ['hosted', 'Hosted Exams'], ['qbank', 'Question Bank'], ['create', 'Custom Exam'], ['exams', 'Manage Exams'], ['analytics', 'Exam Analytics'], ['perf', 'Student Performance'], ['results', 'Results & Excel'], ['review', 'Code Review'], ['settings', 'Settings']]
 
@@ -53,7 +58,7 @@ export default function Admin() {
   if (ok === false) return <div className="narrow card"><h1>No <em>access</em></h1><p className="sub">{user.email} is not an admin. Add this user to the admins table in Supabase, then sign in again.</p><button className="btn alt" onClick={out}>Sign out</button></div>
   const view = { library: hostLib ? <HostWizard lib={hostLib} onCancel={() => setHostLib(null)} onDone={() => go('hosted')} /> : <Library onHost={setHostLib} />, hosted: <Hosted goLibrary={() => go('library')} />, dash: <Dashboard go={go} />, students: <People mode="students" ctx={ctx} />, domains: <Domains go={go} />, qbank: <QuestionBank ctx={ctx} />, create: <ExamForm key={edit?.id || 'new'} domains={doms} edit={edit} onDone={() => go('exams')} />, exams: <ExamList domains={doms} onEdit={x => { setEdit(x); setPage('create') }} />,
     analytics: <Analytics ctx={ctx} />, perf: <People mode="performance" ctx={ctx} />, results: <><h1>Results & <em>Excel</em></h1><p className="sub">Every attempt, sorted by score, date or month, with the full workbook download.</p><LegacyResults /></>, review: <LegacyReview />, settings: <Settings user={user} out={out} /> }[page]
-  return <div className="adm"><nav className="side" aria-label="Admin">{NAV.map(([k, l]) => <button key={k} className={page === k ? 'on' : ''} onClick={() => go(k)}>{l}</button>)}</nav><div style={{ minWidth: 0 }}>{view}</div></div>
+  return <div className="adm"><nav className="side" aria-label="Admin">{NAV.map(([k, l]) => <button key={k} className={page === k ? 'on' : ''} onClick={() => go(k)}>{l}</button>)}</nav><div style={{ minWidth: 0 }}><Suspense fallback={<Loading on />}>{view}</Suspense></div></div>
 }
 
 function useLegacy() {

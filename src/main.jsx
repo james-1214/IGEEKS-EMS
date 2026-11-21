@@ -6,10 +6,10 @@
 // createRoot(document.getElementById('root')).render(<App />)
 
 import { createRoot } from 'react-dom/client';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import './styles.css';
-import Student from './Student';
-import Admin from './Admin';
+const Student = lazy(() => import('./Student'));
+const Admin = lazy(() => import('./Admin'));
 
 const App = () => {
     const [v, setV] = useState('student');
@@ -76,7 +76,7 @@ const App = () => {
             </header>
 
             <main className={v === 'admin' ? 'wide' : ''}>
-                {v === 'student' ? <Student key={sk} onUser={setStu} /> : <Admin />}
+                {v === 'student' ? <Student /> : <Admin />}
             </main>
         </>
     );
