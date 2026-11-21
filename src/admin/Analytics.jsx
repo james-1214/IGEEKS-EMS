@@ -51,7 +51,7 @@ export default function Analytics({ ctx }) {
   const { rows, exams, doms, loading } = useAttempts()
   const [f, setF] = useState({ exam: ctx?.exam || '', dom: '', stu: '', no: '', from: '', to: '', res: '' }), [sel, setSel] = useState(null), up = p => setF(x => ({ ...x, ...p }))
   const list = useMemo(() => rows.filter(r => (!f.exam || r.exam_id === f.exam) && (!f.dom || r.dom === f.dom) && (!f.no || r.attempt_no === +f.no) && (!f.res || (f.res === 'pass') === r.passed) && (!f.from || dateKey(r.submitted_at) >= f.from) && (!f.to || dateKey(r.submitted_at) <= f.to)
-    && (!f.stu || (r.students?.name + ' ' + r.students?.usn + ' ' + r.student_email).toLowerCase().includes(f.stu.toLowerCase()))), [rows, f])
+    && (!f.stu || (r.students?.name + ' ' + r.students?.usn + ' ' + r.student_email).toLowerCase().includes(f.stu.toLowerCase()))).sort((x, y) => Number(y.pct) - Number(x.pct)), [rows, f])
   const k = useMemo(() => kpis(list), [list])
   const ex = () => `igeeks-analytics-${exams.find(e => e.id === f.exam)?.title?.replace(/\W+/g, '-') || 'all-exams'}`
   const out = fmt => { if (!list.length) return toast('Nothing to export', 1); exportSheets({ 'Student analytics': list.map(analyticsRow), 'Exam summary': kpiRows(k) }, ex(), fmt) }
@@ -68,7 +68,7 @@ export default function Analytics({ ctx }) {
     <div className="grid g4" style={{ marginBottom: 16 }}><Kpi label="Students attempted" value={k.students} /><Kpi label="Completed attempts" value={k.attempts} /><Kpi label="Average score" value={k.avgScore.toFixed(1)} /><Kpi label="Average percentage" value={k.avgPct.toFixed(1) + '%'} />
       <Kpi label="Highest score" value={k.highest} /><Kpi label="Lowest score" value={k.lowest} /><Kpi label="Pass rate" value={k.passPct.toFixed(0) + '%'} /><Kpi label="Fail rate" value={k.failPct.toFixed(0) + '%'} />
       <Kpi label="Correct answers" value={k.correct} /><Kpi label="Wrong answers" value={k.wrong} /><Kpi label="Unanswered" value={k.unanswered} /><Kpi label="Average time" value={fmtTime(k.avgTime)} /></div>
-    <div className="card"><div className="scroll"><table><thead><tr><th>Student</th><th>USN</th><th>Email</th><th>Domain</th><th>Attempt</th><th>Score</th><th>Total</th><th>%</th><th>Correct</th><th>Wrong</th><th>Unans.</th><th>Time</th><th>Status</th></tr></thead><tbody>
-      {list.map(r => <tr key={r.id} onClick={() => setSel(r)} style={{ cursor: 'pointer' }}><td>{r.students?.name}</td><td>{r.students?.usn}</td><td>{r.student_email}</td><td>{r.dom}</td><td>{r.attempt_no}</td><td>{r.score}</td><td>{r.max}</td><td>{r.pct}%</td><td>{r.correct ?? '-'}</td><td>{r.wrong ?? '-'}</td><td>{r.unanswered ?? '-'}</td><td>{fmtTime(r.time_taken_sec)}</td><td><Chip c={r.passed ? 'g' : 'r'}>{r.passed ? 'Pass' : 'Fail'}</Chip></td></tr>)}
-      {!list.length && !loading && <tr><td colSpan="13" style={{ color: 'var(--mu)' }}>No attempts match these filters.</td></tr>}</tbody></table></div></div></>
+    <div className="card"><div className="scroll"><table><thead><tr><th>Student</th><th>USN</th><th>Email</th><th>Phone</th><th>Domain</th><th>Attempt</th><th>Score</th><th>Total</th><th>%</th><th>Correct</th><th>Wrong</th><th>Unans.</th><th>Time</th><th>Status</th></tr></thead><tbody>
+      {list.map(r => <tr key={r.id} onClick={() => setSel(r)} style={{ cursor: 'pointer' }}><td>{r.students?.name}</td><td>{r.students?.usn}</td><td>{r.student_email}</td><td>{r.students?.phone}</td><td>{r.dom}</td><td>{r.attempt_no}</td><td>{r.score}</td><td>{r.max}</td><td>{r.pct}%</td><td>{r.correct ?? '-'}</td><td>{r.wrong ?? '-'}</td><td>{r.unanswered ?? '-'}</td><td>{fmtTime(r.time_taken_sec)}</td><td><Chip c={r.passed ? 'g' : 'r'}>{r.passed ? 'Pass' : 'Fail'}</Chip></td></tr>)}
+      {!list.length && !loading && <tr><td colSpan="14" style={{ color: 'var(--mu)' }}>No attempts match these filters.</td></tr>}</tbody></table></div></div></>
 }

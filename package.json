@@ -1,4 +1,3 @@
-
 {
   "name": "igeeks-test-system",
   "private": true,
@@ -19,6 +18,6 @@
     "@vitejs/plugin-react": "^4.3.1",
     "gh-pages": "^6.3.0",
     "supabase": "^2.122.0",
-    "vite": "^5.4.0"
+    "vite": "^8.3.8"
   }
 }

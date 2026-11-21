@@ -61,3 +61,11 @@ body{font-size:14.5px}input:not([type=checkbox]):not([type=radio]),select,textar
 .btn.s{padding:9px 12px}.toast{width:calc(100% - 28px);text-align:center}
 [style*="width: 130px"]{width:84px!important}
 }
+
+/* exam: question palette in a side corner, name in header */
+.who{margin-left:auto;display:flex;align-items:center;gap:10px}.who .chip{font-size:14px;font-weight:700;margin:0}
+.qpal{position:fixed;top:92px;z-index:40;width:196px;max-height:calc(100vh - 110px);overflow:auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.qpal.left{left:12px}.qpal.right{right:12px}
+.qph{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:8px;font-size:13px}.qph button{border:1px solid var(--bd);background:none;border-radius:8px;cursor:pointer;margin-left:4px;padding:2px 7px}
+.qpg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.qpg span{height:34px;display:grid;place-items:center;border-radius:9px;border:1px solid var(--bd);font-weight:600;font-size:13px}.qpg .done{background:var(--g);color:var(--gt);border-color:var(--g)}.qpg .cur{outline:2px solid var(--b);font-weight:800}
+.qpal:has(.qpo){width:auto;padding:0;border:0;background:none;box-shadow:none}.qpo{border:0;background:var(--g);color:var(--gt);font-weight:700;border-radius:12px;padding:8px 12px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2)}

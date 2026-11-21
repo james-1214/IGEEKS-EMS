@@ -72,7 +72,7 @@ export function parseImport(rows, domains) {
   return { valid, errors }
 }
 
-export const analyticsRow = r => ({ Student: r.students?.name || '', USN: r.students?.usn || '', Email: r.student_email, Domain: r.dom || '', Exam: r.exam_title, 'Attempt Number': r.attempt_no, Score: +r.score, 'Total Marks': +r.max, Percentage: r.pct,
+export const analyticsRow = (r, i) => ({ Rank: i + 1, Student: r.students?.name || '', USN: r.students?.usn || '', Email: r.student_email, Phone: r.students?.phone || '', College: r.students?.college || '', Branch: r.students?.branch || '', Domain: r.dom || '', Exam: r.exam_title, 'Attempt Number': r.attempt_no, Score: +r.score, 'Total Marks': +r.max, Percentage: r.pct,
   Correct: r.correct ?? '', Wrong: r.wrong ?? '', Unanswered: r.unanswered ?? '', 'Time Taken': fmtTime(r.time_taken_sec), Status: r.passed ? 'Pass' : 'Fail', Violations: r.violations ?? 0, Date: dateKey(r.submitted_at), Submitted: new Date(r.submitted_at).toLocaleString() })
 export const kpiRows = k => [['Students who attempted', k.students], ['Completed attempts', k.attempts], ['Average score', +k.avgScore.toFixed(2)], ['Highest score', k.highest], ['Lowest score', k.lowest], ['Average percentage', +k.avgPct.toFixed(1)],
   ['Pass percentage', +k.passPct.toFixed(1)], ['Fail percentage', +k.failPct.toFixed(1)], ['Total correct answers', k.correct], ['Total wrong answers', k.wrong], ['Total unanswered', k.unanswered], ['Average time taken', fmtTime(k.avgTime)], ['Attempts used', k.attempts]].map(([Metric, Value]) => ({ Metric, Value }))

@@ -13,6 +13,8 @@ import Admin from './Admin';
 
 const App = () => {
     const [v, setV] = useState('student');
+    const [stu, setStu] = useState({ name: '', step: '' });
+    const [sk, setSk] = useState(0);
     const [t, setT] = useState(() => document.documentElement.dataset.theme || 'light');
 
     const flip = () => {
@@ -37,7 +39,17 @@ const App = () => {
                     <small>Test System</small>
                 </div>
 
-                <div className="seg">
+                {v === 'student' && stu.name ? (
+                    <div className="who">
+                        <span className="chip g">👤 {stu.name}</span>
+                        {stu.step !== 'exam' && (
+                            <button className="btn s alt" onClick={() => { setStu({ name: '', step: '' }); setSk(k => k + 1) }}>
+                                Log out
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="seg">
                     {[
                         ['student', 'Student exam'],
                         ['admin', 'Admin panel']
@@ -51,6 +63,7 @@ const App = () => {
                         </button>
                     ))}
                 </div>
+                )}
 
                 <button
                     className="theme"
@@ -63,7 +76,7 @@ const App = () => {
             </header>
 
             <main className={v === 'admin' ? 'wide' : ''}>
-                {v === 'student' ? <Student /> : <Admin />}
+                {v === 'student' ? <Student key={sk} onUser={setStu} /> : <Admin />}
             </main>
         </>
     );

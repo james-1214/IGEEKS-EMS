@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx'
 export const dKey=r=>new Date(r.submitted_at).toLocaleDateString('en-CA'),mKey=r=>dKey(r).slice(0,7)
 const line=(r,i)=>({Rank:i+1,Name:r.students?.name,Email:r.student_email,USN:r.students?.usn,Phone:r.students?.phone,College:r.students?.college,Branch:r.students?.branch,Plan:r.students?.plan,Domain:r.students?.domain,Exam:r.exam_title,Score:`${r.score}/${r.max}`,Percent:r.pct,Result:r.passed?'Passed':'Not passed','Coding to review':r.pending,'Tab/window violations':r.violations,Date:dKey(r),Month:mKey(r),Time:new Date(r.submitted_at).toLocaleTimeString()})
-const sheet=rows=>XLSX.utils.json_to_sheet([...rows].sort((a,b)=>b.pct-a.pct).map(line))
+const sheet=rows=>XLSX.utils.json_to_sheet([...rows].sort((a,b)=>Number(b.pct)-Number(a.pct)).map(line))
 export function exportFiltered(rows,label){const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheet(rows),label.slice(0,31));XLSX.writeFile(wb,`igeeks-results-${label.replace(/\s/g,'-')}.xlsx`)}
 export function exportAll(rows){const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,sheet(rows),'All results')
 const grp=f=>rows.reduce((m,r)=>((m[f(r)]??=[]).push(r),m),{})
